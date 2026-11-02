@@ -4,32 +4,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Magical Jurassic Kingdom V6.3</title>
+<title>Magical Jurassic Kingdom V6.4</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#14213b;color:white;font-family:Arial}
+body{margin:0;overflow:hidden;background:#8bdcff;font-family:Arial;color:white}
 canvas{display:block}
-button{border:1px solid #ffffff70;background:#49377d;color:white;border-radius:12px;padding:10px;font-weight:bold;touch-action:none}
+button{border:1px solid #ffffff80;border-radius:12px;background:#49377d;color:white;padding:10px;font-weight:bold;touch-action:none}
 button:active{background:#a16de2}
-#start{position:absolute;inset:0;z-index:5;background:linear-gradient(#142849ed,#20153eef);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center}
-h1{color:#ffe68b;font-size:clamp(23px,6vw,39px)}
+#start{position:absolute;inset:0;z-index:5;background:linear-gradient(#142849ed,#20153eef);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px}
+h1{color:#ffe68b;font-size:clamp(23px,6vw,36px)}
 #choices{display:grid;grid-template-columns:repeat(2,145px);gap:9px;margin:10px}
-.hero{background:#ffffff18;border:2px solid #ffffff70;border-radius:15px;padding:10px;min-height:95px}
+.hero{background:#ffffff18;border:2px solid #ffffff70;border-radius:15px;padding:10px}
 .hero.selected{border:3px solid #ffe77b;background:#fff2a52c}
-.emoji{font-size:34px}.hero b{display:block;margin:4px}.hero small{font-size:11px}
+.emoji{font-size:34px}
+.hero b{display:block;margin:4px}
+.hero small{font-size:11px}
 #play{background:#e5b944;color:#33234c;font-size:17px;padding:13px 24px}
 #hud{position:absolute;top:8px;left:8px;right:8px;display:none;justify-content:space-between;pointer-events:none}
 .panel{background:#17213ddd;border-radius:10px;padding:8px;font-size:12px;line-height:1.5}
-#mission{position:absolute;top:62px;left:8px;background:#20183eee;border:1px solid #e5c5ff;border-radius:10px;padding:8px;max-width:210px;font-size:11px;display:none}
+#mission{position:absolute;top:62px;left:8px;background:#20183eee;border:1px solid #e5c5ff;border-radius:10px;padding:8px;max-width:205px;font-size:11px;display:none}
 #message{position:absolute;left:50%;bottom:115px;transform:translateX(-50%);width:min(82%,330px);background:#21183fee;border:2px solid #e5c5ff;border-radius:14px;padding:9px 11px;text-align:center;display:none;line-height:1.35;font-size:13px;z-index:4}
-#message button{font-size:10px;padding:7px 11px;margin:5px 2px 0}
+#message button{font-size:10px;padding:7px;margin:5px 2px 0}
 #controls{position:absolute;bottom:10px;left:10px;right:10px;display:none;justify-content:space-between;align-items:end}
 .pad{display:grid;grid-template-columns:43px 43px 43px;grid-template-rows:40px 40px;gap:4px}
 .pad button{font-size:18px;padding:0}
 #up{grid-column:2}#left{grid-column:1;grid-row:2}#down{grid-column:2;grid-row:2}#right{grid-column:3;grid-row:2}
 .actions{display:grid;grid-template-columns:repeat(2,auto);gap:5px}
-.actions button{font-size:10px;min-width:62px;min-height:38px;padding:5px}
+.actions button{font-size:10px;min-width:65px;min-height:38px;padding:5px}
 #sound{position:absolute;top:8px;right:8px;display:none}
+#switch{position:absolute;top:65px;right:8px;display:none;background:#a35dba}
 #finish{position:absolute;inset:0;background:#111a31ed;z-index:6;display:none;align-items:center;justify-content:center;text-align:center;padding:20px}
 </style>
 </head>
@@ -38,23 +41,24 @@ h1{color:#ffe68b;font-size:clamp(23px,6vw,39px)}
 
 <div id="start">
 <h1>🦖 EMPAT WIRA, SATU HATI</h1>
-<p>Pilih wira kamu dan mulakan pengembaraan!</p>
-<b>PILIH WATAK</b>
+<p>Empat sahabat. Satu pengembaraan!</p>
+<b>PILIH KETUA PASUKAN</b>
 <div id="choices">
 <div class="hero selected" onclick="selectHero(0)"><div class="emoji">🦕💚</div><b>LALA</b><small>Wira Penyayang</small></div>
 <div class="hero" onclick="selectHero(1)"><div class="emoji">🛡️🦖</div><b>TORA</b><small>Wira Berdaya Tahan</small></div>
 <div class="hero" onclick="selectHero(2)"><div class="emoji">👑🦖</div><b>RAJA REX</b><small>Wira Pemimpin</small></div>
-<div class="hero" onclick="selectHero(3)"><div class="emoji">🎒🦕</div><b>BOBI</b><small>Wira Komuniti</small></div>
+<div class="hero" onclick="selectHero(3)"><div class="emoji">🎒🦕</div><b>BOBI</b><small>Wira Warganegara Aktif</small></div>
 </div>
 <button id="play" onclick="startGame()">MULA PENGEMBARAAN ▶</button>
 </div>
 
-<button id="sound" onclick="toggleSound()">🔊 SUARA ON</button>
 <div id="hud">
 <div class="panel">💎 Kristal: <span id="crystals">0</span>/5<br>🏅 Lencana: <span id="badges">0</span>/4</div>
-<div class="panel">🦖 <span id="heroName">Lala</span></div>
+<div class="panel">Ketua: <span id="heroName">Lala</span></div>
 </div>
 <div id="mission">📜 MISI WIRA<br><span id="missionText"></span></div>
+<button id="sound" onclick="toggleSound()">🔊 SUARA ON</button>
+<button id="switch" onclick="switchHero()">🔄 TUKAR WIRA</button>
 
 <div id="message">
 <div id="messageText"></div>
@@ -76,9 +80,8 @@ h1{color:#ffe68b;font-size:clamp(23px,6vw,39px)}
 </div>
 
 <div id="finish"><div>
-<h1>🏆 TAHNIAH, WIRA!</h1>
-<h2>Empat Wira, Satu Hati!</h2>
-<p>Kamu membantu sahabat, berani mencuba, memimpin dan menjaga alam.</p>
+<h1>🏆 TAHNIAH, EMPAT WIRA!</h1>
+<p>Kamu berjaya membantu sahabat, berani mencuba, memimpin dan menjaga alam.</p>
 <h1>💚🛡️👑🌏</h1>
 <button onclick="location.reload()">MAIN LAGI</button>
 </div></div>
@@ -86,17 +89,15 @@ h1{color:#ffe68b;font-size:clamp(23px,6vw,39px)}
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
-
-const heroes=[
-{name:"Lala",color:0x61d99c,clothes:0xf08bba},
-{name:"Tora",color:0x66b5c9,clothes:0x9ba9bd},
-{name:"Raja Rex",color:0xffc65e,clothes:0xe6b83c},
-{name:"Bobi",color:0x65a8f2,clothes:0x55b9ad}
+const data=[
+{name:"Lala",color:0x61d99c,cloth:0xf08bba},
+{name:"Tora",color:0x66b5c9,cloth:0x9ba9bd},
+{name:"Raja Rex",color:0xffc65e,cloth:0xe6b83c},
+{name:"Bobi",color:0x65a8f2,cloth:0x55b9ad}
 ];
-
 let selected=0,started=false,voiceOn=true,lastSpeech="";
-let scene,camera,renderer,clock,player;
-let companions=[],npcs=[],crystals=[],spells=[],keys={};
+let scene,camera,renderer,clock,team=[],leader=0;
+let npcs=[],crystals=[],spells=[],keys={};
 let mission=0,badges=0,crystalCount=0;
 let helped=false,bridgeDone=false,leaderDone=false,cleanDone=false;
 let jumping=false,vy=0;
@@ -105,18 +106,17 @@ function selectHero(n){
 selected=n;
 document.querySelectorAll(".hero").forEach((e,i)=>e.classList.toggle("selected",i===n));
 }
-
 function speak(t){
 lastSpeech=t;
-if(!voiceOn||!("speechSynthesis" in window))return;
+if(!voiceOn||!("speechSynthesis"in window))return;
 speechSynthesis.cancel();
 let u=new SpeechSynthesisUtterance(t);
 u.lang="ms-MY";u.rate=.88;u.pitch=1.08;
 let voices=speechSynthesis.getVoices();
-let v=voices.find(x=>/^ms([-_]|$)/i.test(x.lang));
-if(!v)v=voices.find(x=>/Malay|Bahasa Melayu/i.test(x.name));
-if(!v)v=voices.find(x=>/^id([-_]|$)/i.test(x.lang));
-if(v){u.voice=v;u.lang=v.lang;}
+let v=voices.find(x=>/^ms([-_]|$)/i.test(x.lang))||
+voices.find(x=>/Malay|Bahasa Melayu/i.test(x.name))||
+voices.find(x=>/^id([-_]|$)/i.test(x.lang));
+if(v){u.voice=v;u.lang=v.lang}
 speechSynthesis.speak(u);
 }
 function repeatSpeech(){speak(lastSpeech)}
@@ -132,7 +132,6 @@ $("message").style.display="block";
 speak(t);
 }
 function closeMessage(){$("message").style.display="none"}
-
 function mat(c){return new THREE.MeshStandardMaterial({color:c,roughness:.8})}
 function ball(p,x,y,z,r,c){
 let o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),mat(c));
@@ -147,71 +146,42 @@ let o=new THREE.Mesh(new THREE.CylinderGeometry(a,b,h,12),mat(c));
 o.position.set(x,y,z);p.add(o);return o;
 }
 
-// MEMBINA DINOSAUR DENGAN KEPALA, KAKI DAN EKOR BERASINGAN
+// Model dinosaur dengan bahagian badan yang boleh dianimasikan
 function makeHero(i){
-let d=heroes[i],g=new THREE.Group();
-
+let d=data[i],g=new THREE.Group();
 let body=ball(g,0,1.15,0,.64,d.color);
 body.scale.set(1,1,1.2);
+ball(g,0,1.52,.36,.34,d.color);
 
-// Leher dan kepala
-let neck=ball(g,0,1.52,.36,.34,d.color);
 let head=new THREE.Group();
-head.position.set(0,1.86,.42);
-g.add(head);
+head.position.set(0,1.86,.42);g.add(head);
 ball(head,0,0,0,.49,d.color);
 ball(head,0,-.18,.39,.28,0xffd68a);
 
-// Mata dan anak mata
-let eyes=[];
+let lids=[];
 for(let x of [-.19,.19]){
 ball(head,x,.12,.42,.13,0xffffff);
-let pupil=ball(head,x,.12,.53,.055,0x17152b);
-eyes.push(pupil);
-}
-let eyelids=[];
-for(let x of [-.19,.19]){
+ball(head,x,.12,.53,.055,0x17152b);
 let lid=ball(head,x,.12,.43,.135,d.color);
-lid.scale.y=.03;
-eyelids.push(lid);
+lid.scale.y=.03;lids.push(lid);
 }
 ball(head,0,-.08,.62,.065,0x704b44);
 
-// Senyuman
-let smile=block(head,0,-.25,.60,.18,.025,.025,0x673d3b);
-
-// Pakaian
-let outfit=cyl(g,0,1.12,0,.57,.69,.8,d.clothes);
-
-// Kaki berasingan dengan pivot
-let legs=[];
+cyl(g,0,1.12,0,.57,.69,.8,d.cloth);
+let legs=[],arms=[];
 for(let x of [-.34,.34]){
-let leg=new THREE.Group();
-leg.position.set(x,.75,0);
-g.add(leg);
+let leg=new THREE.Group();leg.position.set(x,.75,0);g.add(leg);
 cyl(leg,0,-.22,0,.17,.20,.52,d.color);
-ball(leg,0,-.47,.09,.23,d.color);
-legs.push(leg);
+ball(leg,0,-.47,.09,.23,d.color);legs.push(leg);
 }
-
-// Tangan
-let arms=[];
 for(let x of [-.58,.58]){
-let arm=new THREE.Group();
-arm.position.set(x,1.35,.05);
-g.add(arm);
-cyl(arm,0,-.18,0,.12,.15,.42,d.color);
-arms.push(arm);
+let arm=new THREE.Group();arm.position.set(x,1.35,.05);g.add(arm);
+cyl(arm,0,-.18,0,.12,.15,.42,d.color);arms.push(arm);
 }
+let tail=new THREE.Group();tail.position.set(0,1,-.63);g.add(tail);
+let tip=ball(tail,0,0,-.42,.22,d.color);tip.scale.set(.8,.8,2.5);
 
-// Ekor
-let tail=new THREE.Group();
-tail.position.set(0,1,-.63);
-g.add(tail);
-let tailBall=ball(tail,0,0,-.42,.22,d.color);
-tailBall.scale.set(.8,.8,2.5);
-
-// Hiasan setiap watak
+// Aksesori berbeza untuk setiap wira
 if(i===0){
 ball(head,-.43,.35,0,.17,0xff83b8);
 ball(head,.43,.35,0,.17,0xff83b8);
@@ -235,53 +205,28 @@ block(g,0,1.25,-.5,.65,.65,.25,0x9c653e);
 block(g,0,1.4,-.65,.5,.4,.08,0x62c4ad);
 ball(g,.5,1.35,.15,.13,0xffd45a);
 }
-
-g.userData.parts={
-head,legs,arms,tail,eyelids,eyes,
-phase:Math.random()*6.28,
-blink:0,
-moving:false,
-jumping:false,
-baseY:0
-};
+g.userData.parts={head,legs,arms,tail,lids,phase:Math.random()*6,blink:0,baseY:0};
+g.userData.heroIndex=i;
 return g;
 }
 
-// ANIMASI BERNAFAS, BERKELIP DAN BERJALAN
 function animateCharacter(c,dt,moving){
-let p=c.userData.parts;
-if(!p)return;
+let p=c.userData.parts;if(!p)return;
 p.phase+=dt*(moving?11:2.2);
-
 let swing=moving?Math.sin(p.phase)*.65:Math.sin(p.phase)*.035;
-
-// Kaki bergerak berselang-seli
 p.legs[0].rotation.x=swing;
 p.legs[1].rotation.x=-swing;
-
-// Tangan ikut mengayun
 p.arms[0].rotation.x=-swing*.55;
 p.arms[1].rotation.x=swing*.55;
-
-// Ekor bergoyang
 p.tail.rotation.y=Math.sin(p.phase*.65)*(moving?.4:.13);
 p.tail.rotation.x=Math.sin(p.phase*.8)*.08;
-
-// Kepala bergerak sedikit
 p.head.rotation.y=Math.sin(p.phase*.4)*(moving?.12:.07);
 p.head.rotation.x=Math.sin(p.phase*.7)*.035;
-
-// Badan turun naik semasa berjalan
 let bob=moving?Math.abs(Math.sin(p.phase*2))*.075:Math.sin(p.phase)*.018;
-c.position.y+=((p.baseY+bob)-c.position.y)*Math.min(1,dt*14);
-
-// Kedipan mata secara berkala
+c.position.y+=(p.baseY+bob-c.position.y)*Math.min(1,dt*14);
 p.blink+=dt;
-let blinkNow=(p.blink%4.2);
-let closing=blinkNow>4.05&&blinkNow<4.17;
-p.eyelids.forEach(lid=>{
-lid.scale.y=closing?.95:.03;
-});
+let blink=p.blink%4.2>4.05&&p.blink%4.2<4.17;
+p.lids.forEach(l=>l.scale.y=blink?.95:.03);
 }
 
 function tree(x,z){
@@ -299,30 +244,26 @@ roof.position.y=3;roof.rotation.y=Math.PI/4;g.add(roof);
 block(g,0,.8,1.53,.8,1.6,.1,0x71472e);
 g.position.set(x,0,z);scene.add(g);
 }
-function makeNPC(x,z,name,color,dialogue,kind){
+function makeNPC(x,z,name,color,dialogue){
 let g=makeHero(0);
 g.traverse(o=>{if(o.material)o.material.color.setHex(color)});
-g.scale.set(.85,.85,.85);
-g.position.set(x,0,z);
-g.userData.name=name;
-g.userData.dialogue=dialogue;
-g.userData.kind=kind;
+g.scale.set(.85,.85,.85);g.position.set(x,0,z);
+g.userData.dialogue=dialogue;g.userData.name=name;
 scene.add(g);npcs.push(g);
 }
 function makeCrystal(x,z){
 let g=new THREE.Group();
 let o=new THREE.Mesh(new THREE.OctahedronGeometry(.5),mat(0x54f4ff));
 o.position.y=1;g.add(o);
-let l=new THREE.PointLight(0x55eaff,1.4,4);
-l.position.y=1;g.add(l);
+let l=new THREE.PointLight(0x55eaff,1.4,4);l.position.y=1;g.add(l);
 g.position.set(x,0,z);scene.add(g);crystals.push(g);
 }
 function updateMission(){
 let tasks=[
-"BANTU: Cari dinosaur kecil di kampung.",
-"BERANI: Pergi ke seberang jambatan batu.",
-"MEMIMPIN: Pergi ke dataran dan bantu sahabat.",
-"JAGA ALAM: Pergi ke sungai dan bersihkan kawasan.",
+"Cari dinosaur kecil di kampung dan bantu dia.",
+"Berjalan ke seberang jambatan batu.",
+"Pergi ke dataran dan bantu sahabat.",
+"Pergi ke sungai dan jaga kebersihan.",
 "SEMUA MISI SELESAI! Kamu wira hebat!"
 ];
 $("missionText").textContent=tasks[mission];
@@ -336,9 +277,9 @@ $("hud").style.display="flex";
 $("mission").style.display="block";
 $("controls").style.display="flex";
 $("sound").style.display="block";
-$("heroName").textContent=heroes[selected].name;
+$("switch").style.display="block";
 init();
-say("Hai "+heroes[selected].name+"! Mari kita mulakan pengembaraan!");
+say("Hai semua! Empat wira sudah bersedia. Mari kita bekerjasama!");
 }
 
 function init(){
@@ -364,42 +305,51 @@ house(Math.cos(a)*13,Math.sin(a)*13,i%2?0x9d5dca:0xe5a54e);
 }
 for(let i=0;i<8;i++)block(scene,0,.03,-12-i*1.5,3,.16,1.3,0xb9a58a);
 
-let water=new THREE.Mesh(new THREE.PlaneGeometry(14,40),new THREE.MeshStandardMaterial({color:0x37c7ed,transparent:true,opacity:.8}));
-water.rotation.x=-Math.PI/2;
-water.position.set(0,-.01,-24);scene.add(water);
+let water=new THREE.Mesh(new THREE.PlaneGeometry(14,40),
+new THREE.MeshStandardMaterial({color:0x37c7ed,transparent:true,opacity:.8}));
+water.rotation.x=-Math.PI/2;water.position.set(0,-.01,-24);scene.add(water);
 
 for(let i=0;i<38;i++){
 let x=(Math.random()-.5)*65,z=(Math.random()-.5)*65;
 if(Math.abs(x)<18&&Math.abs(z)<23)continue;
 tree(x,z);
 }
-makeNPC(-8,6,"Dino Kecil",0xffa56b,"Tolong saya! Saya perlukan bantuan.",0);
-makeNPC(10,8,"Sahabat Kampung",0x70c7e8,"Kita perlu bekerjasama.",1);
-makeNPC(-11,-24,"Penjaga Sungai",0x69c8a5,"Sungai kita kotor. Mari kita bersihkan.",2);
+makeNPC(-8,6,"Dino Kecil","0xffa56b","Tolong saya! Saya perlukan bantuan.");
+makeNPC(10,8,"Sahabat Kampung",0x70c7e8,"Kita perlu bekerjasama.");
+makeNPC(-11,-24,"Penjaga Sungai",0x69c8a5,"Sungai kita kotor. Mari kita bersihkan.");
 
 [[-8,-4],[8,-5],[-18,-18],[18,-24],[0,-36]].forEach(p=>makeCrystal(p[0],p[1]));
 
-player=makeHero(selected);
-player.position.set(0,0,24);
-player.userData.parts.baseY=0;
-scene.add(player);
-
+// Keempat-empat wira berada dalam pasukan dari awal
+let positions=[
+[-2,0,25],[0,0,27],[2,0,25],[0,0,29]
+];
 for(let i=0;i<4;i++){
-if(i===selected)continue;
 let c=makeHero(i);
-c.scale.set(.72,.72,.72);
-c.position.set(i%2===0?-2:2,0,27+companions.length*2);
+c.position.set(...positions[i]);
 c.userData.parts.baseY=0;
-scene.add(c);companions.push(c);
+scene.add(c);team.push(c);
 }
+leader=selected;
+updateLeaderUI();
 updateMission();
-animate();
 }
 
+function updateLeaderUI(){
+$("heroName").textContent=data[leader].name;
+team.forEach((c,i)=>{
+c.scale.setScalar(i===leader?1:.78);
+});
+}
+function switchHero(){
+leader=(leader+1)%4;
+updateLeaderUI();
+say("Sekarang "+data[leader].name+" menjadi ketua pasukan!");
+}
 function nearestNPC(){
-let found=null,distance=7;
+let p=team[leader],found=null,distance=7;
 for(let n of npcs){
-let d=n.position.distanceTo(player.position);
+let d=n.position.distanceTo(p.position);
 if(d<distance){distance=d;found=n;}
 }
 return found;
@@ -410,39 +360,40 @@ if(n)say(n.userData.name+". "+n.userData.dialogue);
 else say("Cari dinosaur berhampiran untuk bercakap.");
 }
 function reward(){
-badges++;
-$("badges").textContent=badges;
+badges++;$("badges").textContent=badges;
 }
 function doAction(){
+let p=team[leader];
 if(mission===0){
 let n=nearestNPC();
-if(n&&n.userData.kind===0&&!helped){
+if(n&&!helped){
 helped=true;reward();mission=1;updateMission();
 say("Terima kasih! Kamu sangat penyayang. Lencana Hati Penyayang diperoleh!");
 }else say("Cari dinosaur kecil di kampung.");
 }else if(mission===1){
-if(player.position.z< -9&&!bridgeDone){
+if(p.position.z< -9&&!bridgeDone){
 bridgeDone=true;reward();mission=2;updateMission();
 say("Hebat! Kamu berjaya menyeberangi jambatan. Jangan berputus asa!");
 }else say("Berjalan ke arah jambatan dan teruskan ke seberang.");
 }else if(mission===2){
-if(player.position.distanceTo(new THREE.Vector3(0,0,0))<17&&!leaderDone){
+if(p.position.distanceTo(new THREE.Vector3(0,0,0))<17&&!leaderDone){
 leaderDone=true;reward();mission=3;updateMission();
 say("Kamu memimpin sahabat dengan baik. Pemimpin yang baik bekerjasama!");
 }else say("Pergi ke dataran tengah kampung.");
 }else if(mission===3){
-if(player.position.distanceTo(new THREE.Vector3(0,0,-24))<13&&!cleanDone){
+if(p.position.distanceTo(new THREE.Vector3(0,0,-24))<13&&!cleanDone){
 cleanDone=true;reward();mission=4;updateMission();
 say("Syabas! Kamu menjaga sungai dan membantu komuniti!");
 setTimeout(()=>$("finish").style.display="flex",4000);
-}else say("Pergi ke sungai untuk membersihkan kawasan.");
+}else say("Pergi ke sungai untuk menjaga kebersihan.");
 }else say("Semua misi sudah selesai. Kamu wira hebat!");
 }
 function castSpell(){
-let p=new THREE.Mesh(new THREE.SphereGeometry(.2,12,10),mat(0xa66cff));
-p.position.copy(player.position);p.position.y+=1.5;
-p.userData.dir=new THREE.Vector3(0,0,1).applyQuaternion(player.quaternion);
-spells.push(p);scene.add(p);
+let p=team[leader];
+let s=new THREE.Mesh(new THREE.SphereGeometry(.2,12,10),mat(0xa66cff));
+s.position.copy(p.position);s.position.y+=1.5;
+s.userData.dir=new THREE.Vector3(0,0,1).applyQuaternion(p.quaternion);
+spells.push(s);scene.add(s);
 }
 
 function bind(id,key){
@@ -450,7 +401,8 @@ let b=$(id);
 b.addEventListener("pointerdown",e=>{
 e.preventDefault();keys[key]=true;b.setPointerCapture(e.pointerId);
 });
-["pointerup","pointercancel","lostpointercapture"].forEach(ev=>b.addEventListener(ev,()=>keys[key]=false));
+["pointerup","pointercancel","lostpointercapture"].forEach(ev=>
+b.addEventListener(ev,()=>keys[key]=false));
 }
 bind("up","up");bind("down","down");bind("left","left");bind("right","right");
 
@@ -469,6 +421,7 @@ if(["ArrowRight","d"].includes(e.key))keys.right=true;
 if(e.key===" "&&!jumping){jumping=true;vy=.23;}
 if(e.key==="e")talk();
 if(e.key==="f")doAction();
+if(e.key==="q")switchHero();
 });
 addEventListener("keyup",e=>{
 if(["ArrowUp","w"].includes(e.key))keys.up=false;
@@ -487,77 +440,73 @@ if(keys.left)dx-=1;
 if(keys.right)dx+=1;
 let len=Math.hypot(dx,dz)||1;
 dx/=len;dz/=len;
-
 let moving=!!(dx||dz);
-player.position.x+=dx*7*dt;
-player.position.z+=dz*7*dt;
-player.position.x=THREE.MathUtils.clamp(player.position.x,-65,65);
-player.position.z=THREE.MathUtils.clamp(player.position.z,-65,65);
+let leaderDino=team[leader];
 
-if(moving)player.rotation.y=Math.atan2(dx,dz);
+leaderDino.position.x+=dx*7*dt;
+leaderDino.position.z+=dz*7*dt;
+leaderDino.position.x=THREE.MathUtils.clamp(leaderDino.position.x,-65,65);
+leaderDino.position.z=THREE.MathUtils.clamp(leaderDino.position.z,-65,65);
+if(moving)leaderDino.rotation.y=Math.atan2(dx,dz);
 
-// Lompat
+// Lompat ketua pasukan
 if(jumping){
-player.position.y+=vy;
+leaderDino.position.y+=vy;
 vy-=.014;
-if(player.position.y<=0){
-player.position.y=0;
-jumping=false;
-vy=0;
+if(leaderDino.position.y<=0){
+leaderDino.position.y=0;jumping=false;vy=0;
 }
 }
-animateCharacter(player,dt,moving);
 
-// Teman bergerak mengikuti pemain
-companions.forEach((c,i)=>{
-let offsetX=i%2===0?-2:2;
+// Tiga rakan mengikuti ketua dalam formasi
+let offsets=[
+[0,0,0],[-2.5,0,-2.5],[2.5,0,-2.5],[0,0,-5]
+];
+team.forEach((c,i)=>{
+if(i!==leader){
+let off=offsets[i];
 let target=new THREE.Vector3(
-player.position.x+offsetX,0,
-player.position.z+3+Math.floor(i/2)*2
+leaderDino.position.x+off[0],
+0,
+leaderDino.position.z+off[2]
 );
-let distance=c.position.distanceTo(target);
-c.position.lerp(target,Math.min(1,dt*2.8));
-let mx=target.x-c.position.x;
-let mz=target.z-c.position.z;
-let friendMoving=distance>.5;
-if(friendMoving)c.rotation.y=Math.atan2(mx,mz);
-animateCharacter(c,dt,friendMoving);
+let dist=c.position.distanceTo(target);
+c.position.lerp(target,Math.min(1,dt*2.7));
+let mx=target.x-c.position.x,mz=target.z-c.position.z;
+if(dist>.5)c.rotation.y=Math.atan2(mx,mz);
+animateCharacter(c,dt,dist>.5);
+}else{
+animateCharacter(c,dt,moving);
+}
 });
 
-// NPC juga bergerak sedikit supaya dunia terasa hidup
-npcs.forEach((n,i)=>{
-animateCharacter(n,dt,false);
-n.userData.parts.head.rotation.y+=Math.sin(clock.elapsedTime*.8+i)*.001;
-});
-
-// Kamera mengikuti pemain
-let target=new THREE.Vector3(player.position.x,player.position.y+1,player.position.z);
-let behind=new THREE.Vector3(0,8,12).applyAxisAngle(new THREE.Vector3(0,1,0),player.rotation.y);
+// Kamera mengikut ketua
+let target=new THREE.Vector3(leaderDino.position.x,leaderDino.position.y+1,leaderDino.position.z);
+let behind=new THREE.Vector3(0,8,12).applyAxisAngle(new THREE.Vector3(0,1,0),leaderDino.rotation.y);
 camera.position.lerp(target.clone().add(behind),.09);
 camera.lookAt(target.x,target.y+1,target.z-2);
 
+// NPC bergerak kecil dan bernafas
+npcs.forEach(n=>animateCharacter(n,dt,false));
+
 // Kristal
 for(let i=crystals.length-1;i>=0;i--){
-let c=crystals[i];
-c.rotation.y+=dt*1.5;
-if(c.position.distanceTo(player.position)<1.8){
+let c=crystals[i];c.rotation.y+=dt*1.5;
+if(c.position.distanceTo(leaderDino.position)<1.8){
 scene.remove(c);crystals.splice(i,1);
-crystalCount++;
-$("crystals").textContent=crystalCount;
+crystalCount++;$("crystals").textContent=crystalCount;
 }
 }
 
 // Sihir
 for(let i=spells.length-1;i>=0;i--){
-let s=spells[i];
-s.position.addScaledVector(s.userData.dir,dt*20);
-if(s.position.distanceTo(player.position)>45){
+let s=spells[i];s.position.addScaledVector(s.userData.dir,dt*20);
+if(s.position.distanceTo(leaderDino.position)>45){
 scene.remove(s);spells.splice(i,1);
 }
 }
 renderer.render(scene,camera);
 }
-
 addEventListener("resize",()=>{
 if(!camera||!renderer)return;
 camera.aspect=innerWidth/innerHeight;
