@@ -292,3 +292,83 @@ html, body {
     bottom: 5px;
   }
 }
+
+/* ===== JOYSTICK BULAT ===== */
+
+#touch-controls {
+  position: absolute;
+  inset: auto 0 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 22px;
+  pointer-events: none;
+}
+
+.control-group {
+  display: none !important;
+}
+
+.virtual-joystick {
+  width: 118px;
+  height: 118px;
+  border: 3px solid #ffffff75;
+  border-radius: 50%;
+  background: radial-gradient(circle, #42677b99, #102d43dd);
+  box-shadow: 0 5px 18px #0008, inset 0 0 15px #ffffff22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  touch-action: none;
+  position: relative;
+}
+
+.joystick-knob {
+  width: 52px;
+  height: 52px;
+  border: 3px solid #ffffffb0;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #e8faff, #5486a2);
+  box-shadow: 0 4px 12px #0008;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.jump-control {
+  width: 75px;
+  height: 75px;
+  margin-bottom: 12px;
+  border: 3px solid #ffffffa0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffcf68, #bd5d25);
+  color: white;
+  font: 900 13px Nunito, sans-serif;
+  box-shadow: 0 5px 15px #0008;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.jump-control:active {
+  transform: scale(0.9);
+}
+
+@media (max-height: 430px) {
+  .virtual-joystick {
+    width: 100px;
+    height: 100px;
+  }
+
+  .joystick-knob {
+    width: 45px;
+    height: 45px;
+  }
+
+  .jump-control {
+    width: 65px;
+    height: 65px;
+  }
+}
