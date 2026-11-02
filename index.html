@@ -2,738 +2,221 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Jurassic Kingdom V10.2</title>
-<style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071b20;font-family:Arial,sans-serif;touch-action:none}
-#game{position:fixed;inset:0}
-canvas{display:block;width:100%;height:100%}
-#start{
- position:fixed;inset:0;z-index:20;background:linear-gradient(135deg,#082d32,#135b45 55%,#183d5b);
- display:flex;align-items:center;justify-content:center;text-align:center;color:white;padding:20px
-}
-.startbox{max-width:520px}
-.startbox h1{font-size:clamp(28px,6vw,48px);margin:8px;color:#ffe58b;text-shadow:0 4px 8px #000}
-.startbox p{line-height:1.5}
-.startbox button{border:0;border-radius:16px;padding:15px 30px;font-size:19px;font-weight:bold;background:#ffd65c;color:#3a2b0b}
-#top{
- position:fixed;top:8px;left:9px;z-index:5;color:white;
- background:#061c1dcc;border:1px solid #ffffff30;border-radius:12px;
- padding:7px 11px;font-size:12px;line-height:1.5;pointer-events:none
-}
-#missions{
- position:fixed;right:7px;top:8px;z-index:6;width:min(190px,29vw);
- background:#071b20d9;color:white;border:1px solid #ffffff40;
- border-radius:12px;padding:8px 9px;pointer-events:none;
- max-height:48vh;overflow:hidden
-}
-#missions h3{font-size:12px;margin:0 0 6px;color:#ffe58b;letter-spacing:1px}
-#missionList{font-size:10px;line-height:1.35}
-.mission{padding:5px 2px;border-bottom:1px solid #ffffff25}
-#heroTag{
- position:fixed;left:50%;top:8px;transform:translateX(-50%);
- color:white;background:#09252bd9;border-radius:20px;padding:6px 12px;
- font-size:11px;z-index:5;pointer-events:none;white-space:nowrap
-}
-#controls{position:fixed;bottom:12px;left:10px;z-index:8;display:flex;gap:7px;align-items:end}
-.pad{display:grid;grid-template-columns:42px 42px 42px;grid-template-rows:39px 39px 39px;gap:3px}
-.ctrl{
- border:1px solid #ffffff80;border-radius:11px;background:#102d36cc;color:white;
- font-size:19px;font-weight:bold;touch-action:none;min-width:40px;min-height:38px
-}
-.ctrl:active,.ctrl.active{background:#e6a832;color:#241b08}
-#actions{position:fixed;bottom:14px;right:min(205px,31vw);z-index:8;display:flex;gap:7px;align-items:end}
-#actions .ctrl{width:48px;height:48px;border-radius:50%;font-size:12px}
-#actions .big{width:56px;height:56px;background:#a52b2b;color:white}
-#heroSelect{
- position:fixed;left:8px;top:75px;z-index:7;display:flex;gap:4px
-}
-.heroBtn{font-size:10px;padding:6px 8px;border:1px solid #ffffff70;border-radius:9px;background:#0b2736dd;color:white}
-.heroBtn.selected{background:#e6ae38;color:#241b08}
-#sound{
- position:fixed;top:49px;left:9px;z-index:7;border:0;border-radius:9px;
- background:#163d3b;color:white;padding:6px 9px;font-size:11px
-}
-#hint{
- position:fixed;bottom:82px;left:50%;transform:translateX(-50%);
- color:white;background:#071b20c9;padding:6px 12px;border-radius:12px;
- font-size:11px;z-index:5;white-space:nowrap;pointer-events:none
-}
-#rotate{
- display:none;position:fixed;inset:0;background:#071b20;color:white;z-index:30;
- align-items:center;justify-content:center;text-align:center;padding:25px
-}
-#rotate div{font-size:20px;line-height:1.6}
-@media(orientation:portrait){
- #rotate{display:flex}
-}
-@media(max-height:420px){
- #missions{max-height:43vh;width:165px}
- #heroSelect{top:65px}
- #actions .ctrl{width:42px;height:42px}
- #actions .big{width:49px;height:49px}
- #hint{bottom:67px}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <meta name="theme-color" content="#071522">
+
+  <title>Magical Jurassic Kingdom V11</title>
+
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<div id="game"></div>
 
-<div id="start">
- <div class="startbox">
-  <div style="font-size:55px">🦖🌋</div>
-  <h1>JURASSIC KINGDOM</h1>
-  <h2>V10.2 – WIRA EMPAT PENJURU</h2>
-  <p>Selamatkan dunia dinosaur! Pilih wira, jelajah dunia dan selesaikan semua misi.</p>
-  <button id="startBtn">MULA PENGEMBARAAN</button>
-  <p style="font-size:11px">Untuk pengalaman terbaik, gunakan telefon secara landskap.</p>
- </div>
-</div>
+  <!-- DUNIA 3D -->
+  <div id="game-container"></div>
 
-<div id="rotate"><div>📱<br><b>Sila pusing telefon ke LANDSKAP</b><br>Supaya dunia permainan lebih luas.</div></div>
+  <!-- PANDUAN LANDSKAP -->
+  <div id="rotate-screen">
+    <div>
+      <span class="rotate-icon">📱</span>
+      Sila pusing telefon kepada mod LANDSKAP untuk bermain!
+    </div>
+  </div>
 
-<div id="top">💎 Kristal: <span id="crystalCount">0</span>/8<br>🥚 Telur: <span id="eggCount">0</span>/3<br>🐣 Anak diselamatkan: <span id="babyCount">0</span>/3</div>
-<div id="heroTag">LALA – WIRA PENYAYANG</div>
-<button id="sound">🔊 SUARA: OFF</button>
+  <!-- MENU UTAMA -->
+  <div id="main-menu">
 
-<div id="heroSelect">
- <button class="heroBtn selected" data-hero="LALA">LALA</button>
- <button class="heroBtn" data-hero="TORA">TORA</button>
- <button class="heroBtn" data-hero="REX">RAJA REX</button>
- <button class="heroBtn" data-hero="BOBI">BOBI</button>
-</div>
+    <h1 class="game-title">
+      MAGICAL<br>
+      JURASSIC KINGDOM
+    </h1>
 
-<div id="missions">
- <h3>📜 SENARAI MISI</h3>
- <div id="missionList"></div>
-</div>
+    <p class="game-subtitle">
+      Pengembaraan Empat Wira Dinosaur
+    </p>
 
-<div id="hint">Gunakan butang untuk bergerak dan meneroka</div>
+    <button id="start-button" class="primary-button">
+      MULA BERMAIN
+    </button>
 
-<div id="controls">
- <div class="pad">
-  <div></div><button class="ctrl" data-move="forward">▲</button><div></div>
-  <button class="ctrl" data-move="left">◀</button><button class="ctrl" data-move="back">▼</button><button class="ctrl" data-move="right">▶</button>
-  <div></div><div></div><div></div>
- </div>
-</div>
+    <p style="margin-top:22px;color:#d5eaf0;font-size:12px;">
+      Dunia ajaib menanti keberanianmu!
+    </p>
 
-<div id="actions">
- <button class="ctrl" id="jump">LOMPAT</button>
- <button class="ctrl" id="interact">AKSI</button>
- <button class="ctrl big" id="attack">KUASA</button>
-</div>
+  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script>
-(()=>{
-"use strict";
+  <!-- PILIH WATAK -->
+  <div id="character-menu">
 
-const $=id=>document.getElementById(id);
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x8bd2e5);
-scene.fog=new THREE.Fog(0x8bd2e5,85,190);
+    <h2 class="menu-heading">PILIH WIRA KAMU</h2>
 
-const camera=new THREE.PerspectiveCamera(56,innerWidth/innerHeight,.1,350);
-camera.position.set(0,10,16);
+    <div class="character-grid">
 
-const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:"high-performance"});
-renderer.setPixelRatio(Math.min(devicePixelRatio||1,1));
-renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled=false;
-renderer.outputColorSpace=THREE.SRGBColorSpace;
-$("game").appendChild(renderer.domElement);
+      <button class="character-card selected" data-hero="0">
+        <span style="font-size:38px;">🦖</span>
+        <span class="character-name">LALA</span>
+        <span class="character-role">Wira Penyayang</span>
+      </button>
 
-scene.add(new THREE.HemisphereLight(0xd9f4ff,0x42613a,2.1));
-const sun=new THREE.DirectionalLight(0xfff2d5,2.1);
-sun.position.set(-35,65,35);scene.add(sun);
+      <button class="character-card" data-hero="1">
+        <span style="font-size:38px;">🦕</span>
+        <span class="character-name">TORA</span>
+        <span class="character-role">Wira Berdaya Tahan</span>
+      </button>
 
-const mat=(color,rough=.85,metal=0)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});
-const M={
- grass:mat(0x4e9b50),grass2:mat(0x6eae50),darkGrass:mat(0x286b42),
- path:mat(0xb99a65),water:mat(0x32b8d1,.35),wood:mat(0x70442a),
- leaf:mat(0x267b48),leaf2:mat(0x48a34f),rock:mat(0x78858a),
- gold:mat(0xffc83d,.4,.35),crystal:mat(0x4ce8fa,.25,.25),
- red:mat(0xe34b37),white:mat(0xf4ead6),black:mat(0x17202a),
- purple:mat(0x8145c9),ice:mat(0x9ee8f4),lava:mat(0xff612d)
-};
-function mesh(geo,material,parent,x=0,y=0,z=0){
- const o=new THREE.Mesh(geo,material);o.position.set(x,y,z);parent.add(o);return o;
-}
-function group(parent,x=0,y=0,z=0){const g=new THREE.Group();g.position.set(x,y,z);parent.add(g);return g}
-function box(parent,x,y,z,sx,sy,sz,material){
- return mesh(new THREE.BoxGeometry(sx,sy,sz),material,parent,x,y,z);
-}
-function sphere(parent,x,y,z,sx,sy,sz,material){
- const o=mesh(new THREE.SphereGeometry(1,10,8),material,parent,x,y,z);
- o.scale.set(sx,sy,sz);return o;
-}
-function cylinder(parent,x,y,z,r1,r2,h,material,segments=8){
- return mesh(new THREE.CylinderGeometry(r1,r2,h,segments),material,parent,x,y,z);
-}
+      <button class="character-card" data-hero="2">
+        <span style="font-size:38px;">👑</span>
+        <span class="character-name">RAJA REX</span>
+        <span class="character-role">Wira Berupaya Memimpin</span>
+      </button>
 
-const ground=mesh(new THREE.CylinderGeometry(105,105,2,48),M.grass,scene,0,-1.2,0);
-ground.scale.z=.9;
-const land=mesh(new THREE.CircleGeometry(104,48),M.grass,scene,0,-.15,0);
-land.rotation.x=-Math.PI/2;
+      <button class="character-card" data-hero="3">
+        <span style="font-size:38px;">🌟</span>
+        <span class="character-name">BOBI</span>
+        <span class="character-role">Wira Warganegara Aktif</span>
+      </button>
 
-// Jalan utama
-function path(x,z,w,l,rot=0){
- const p=box(scene,x,.01,z,w,.08,l,M.path);p.rotation.y=rot;return p;
-}
-path(0,.5,9,105,0);
-path(0,-28,65,7,0);
-path(0,30,75,6,0);
-path(-40,0,6,65,0);
-path(40,-20,6,55,0);
+    </div>
 
-const river=box(scene,-62,.03,30,8,.12,95,M.water);
-river.rotation.y=.12;
-for(let i=0;i<13;i++){
- const r=sphere(scene,-62+Math.sin(i)*2,.17, -10+i*6,1.1,.12,2,mat(0x9cecf1,.3));
- r.rotation.y=.5;
-}
+    <button id="play-button"
+            class="primary-button"
+            style="margin-top:20px;">
+      TEROKA DUNIA!
+    </button>
 
-// Air terjun hiasan
-const waterfall=box(scene,-59,3,-8,7,6,.5,mat(0x7deaff,.25));
-waterfall.material.transparent=true;waterfall.material.opacity=.65;
-box(scene,-59,0,-8,9,.5,3,M.rock);
+  </div>
 
-// Gunung dan gunung berapi
-const volcano=group(scene,51,0,-44);
-cylinder(volcano,0,8,0,17,4,18,mat(0x554c47),12);
-cylinder(volcano,0,16,0,5,2,2,M.lava,12);
-for(let i=0;i<7;i++){
- const lavaLine=box(volcano,Math.sin(i*2)*6,7+i*.8,Math.cos(i*2)*6,.8,5,.8,M.lava);
- lavaLine.rotation.z=.35;
-}
-const iceMountain=group(scene,55,0,48);
-mesh(new THREE.ConeGeometry(17,24,9),M.ice,iceMountain,0,11,0);
-mesh(new THREE.ConeGeometry(8,13,8),mat(0xeaffff),iceMountain,7,6,3);
+  <!-- PAPARAN PERMAINAN -->
+  <div id="game-hud">
 
-// Kawasan gua
-const cave=group(scene,-35,0,-54);
-mesh(new THREE.CylinderGeometry(10,13,13,10,1,true,0,Math.PI),M.rock,cave,0,6,0);
-box(cave,0,.1,0,17,.3,13,M.rock);
+    <!-- STATUS WIRA -->
+    <div class="hud-panel">
 
-// Pokok
-const trees=[];
-function tree(x,z,s=1){
- const t=group(scene,x,0,z);t.scale.setScalar(s);
- cylinder(t,0,2,0,.65,.8,4,M.wood,7);
- for(let i=0;i<3;i++){
-  const crown=mesh(new THREE.IcosahedronGeometry(2.1-i*.2,0),i%2?M.leaf:M.leaf2,t,0,4+i*1.35,0);
-  crown.scale.set(1.1,1,.9);
- }
- trees.push(t);
-}
-for(let i=0;i<55;i++){
- const x=(Math.random()-.5)*170,z=(Math.random()-.5)*165;
- if(Math.abs(x)<13&&Math.abs(z)<16)continue;
- if(x<-55&&Math.abs(z)<45)continue;
- if(x>35&&z<-30)continue;
- tree(x,z,.65+Math.random()*.55);
-}
+      <div class="hud-title">WIRA PILIHAN</div>
 
-// Rumah kampung
-function house(x,z,color=0xdca45a){
- const h=group(scene,x,0,z);
- box(h,0,2,0,7,4,6,mat(color));
- const roof=mesh(new THREE.ConeGeometry(5.5,3,4),mat(0x8b3f2c),h,0,5.4,0);
- roof.rotation.y=Math.PI/4;
- box(h,0,1.1,3.06,1.5,2.2,.12,M.wood);
- for(let i=-1;i<=1;i+=2)box(h,i*2.2,2.5,3.08,1.1,1,.12,mat(0x9de5f1));
-}
-house(0,-7,0xd6a35f);house(10,-9,0xe6bd77);house(-11,-9,0xb5c77b);
-house(7,10,0xc58d5e);
+      <div id="hero-name">LALA</div>
 
-// Hiasan batu dan cendawan
-for(let i=0;i<35;i++){
- const x=(Math.random()-.5)*145,z=(Math.random()-.5)*135;
- if(Math.abs(x)<14&&Math.abs(z)<15)continue;
- sphere(scene,x,.35,z,.7,.5,.7,M.rock);
-}
-for(let i=0;i<18;i++){
- const x=-45+Math.random()*22,z=-45+Math.random()*30;
- cylinder(scene,x,.5,z,.25,.3,1,mat(0xf0d8ba),7);
- sphere(scene,x,1,z,.7,.25,.7,i%2?M.red:M.purple);
-}
+      <div id="health-bar">
+        <div id="health-fill"></div>
+      </div>
 
-// Watak dinosaur lebih terperinci
-const heroDefs={
- LALA:{name:"LALA",title:"WIRA PENYAYANG",body:0x43c86a,belly:0xb9ef9b,accent:0xffd45c,crest:0x269b56,dialog:"Jom kita bantu kawan! Kawan yang susah jangan kita tinggalkan."},
- TORA:{name:"TORA",title:"WIRA BERDAYA TAHAN",body:0x6f91ad,belly:0xd4e3e9,accent:0xe6b74d,crest:0x405c75,dialog:"Jangan putus asa! Cuba lagi. Kita pasti boleh!"},
- REX:{name:"RAJA REX",title:"WIRA BERUPAYA MEMIMPIN",body:0xe6ad31,belly:0xffe4a1,accent:0xffe47b,crest:0xa76b1e,dialog:"Pemimpin yang baik mendengar pendapat kawan-kawan!"},
- BOBI:{name:"BOBI",title:"WIRA WARGANEGARA AKTIF",body:0x36a9d8,belly:0xb5eafa,accent:0xffa83b,crest:0x1877a7,dialog:"Sungai bersih, kampung ceria! Mari kita jaga alam bersama-sama!"}
-};
-const heroGroups={};
-function makeDino(kind,scale=1){
- const d=heroDefs[kind]||{body:0x4d9c54,belly:0xd8e5a8,accent:0xe5c56a,crest:0x326f43};
- const root=group(scene);root.scale.setScalar(scale);
- const body=group(root,0,1.35,0);
- const skin=mat(d.body),belly=mat(d.belly),accent=mat(d.accent),crest=mat(d.crest);
- // badan besar dan dada
- sphere(body,0,0,0,1.15,.83,1.55,skin);
- sphere(body,0,-.35,.82,.84,.49,.8,belly);
- // leher
- sphere(body,0,.52,1.05,.7,.72,.68,skin);
- // kepala
- const head=group(body,0,.93,1.45);
- sphere(head,0,.15,.05,.82,.75,.82,skin);
- sphere(head,0,-.13,.72,.63,.38,.58,skin);
- sphere(head,0,-.34,.7,.5,.13,.4,belly);
- // mata besar
- for(const side of [-1,1]){
-  sphere(head,side*.43,.32,.53,.22,.25,.12,M.white);
-  sphere(head,side*.45,.31,.64,.105,.14,.07,M.black);
-  sphere(head,side*.47,.36,.69,.045,.05,.025,M.white);
-  // lubang hidung
-  sphere(head,side*.22,-.01,1.12,.07,.055,.04,M.black);
-  // lengan
-  const arm=group(body,side*.83,.35,.55);
-  sphere(arm,0,-.18,.12,.28,.5,.3,skin);
-  sphere(arm,0,-.43,.3,.24,.18,.28,skin);
-  // kuku
-  for(let k=-1;k<=1;k++)sphere(arm,k*.12,-.48,.5,.045,.07,.07,accent);
-  // kaki
-  const leg=group(root,side*.53,.65,-.05);
-  sphere(leg,0,-.18,0,.38,.58,.43,skin);
-  sphere(leg,0,-.52,.22,.43,.18,.58,skin);
-  for(let k=-1;k<=1;k++)sphere(leg,k*.17,-.58,.65,.07,.08,.15,accent);
-  root.userData.legs=root.userData.legs||[];root.userData.legs.push(leg);
-  root.userData.arms=root.userData.arms||[];root.userData.arms.push(arm);
- }
- // ekor panjang
- const tail=mesh(new THREE.ConeGeometry(.42,2.3,8),skin,body,0,-.1,-1.65);
- tail.rotation.x=-Math.PI/2;tail.rotation.z=Math.PI;
- // duri belakang
- for(let i=0;i<5;i++){
-  const spike=mesh(new THREE.ConeGeometry(.19,.55,6),accent,body,0,.78,-.9+i*.42);
-  spike.rotation.x=-.2;
- }
- // plat kepala/crest
- if(kind==="TORA"){
-  for(let s of [-1,1]){
-   const horn=mesh(new THREE.ConeGeometry(.22,1.05,7),accent,head,s*.63,.63,.05);
-   horn.rotation.z=s*.5;
-  }
-  const noseHorn=mesh(new THREE.ConeGeometry(.2,.8,7),accent,head,0,.2,.94);
-  noseHorn.rotation.x=-.7;
- }else{
-  for(let i=0;i<3;i++){
-   const spike=mesh(new THREE.ConeGeometry(.2,.65,7),crest,head,0,.75-i*.08,-.15-i*.3);
-   spike.rotation.z=.15;
-  }
- }
- // aksesori watak
- if(kind==="REX"){
-  const crown=mesh(new THREE.CylinderGeometry(.48,.62,.32,6),M.gold,head,0,.87,.05);
-  for(let i=0;i<3;i++)mesh(new THREE.ConeGeometry(.15,.45,5),M.gold,head,-.35+i*.35,1.22,.05);
-  sphere(body,0,.15,1.28,.35,.3,.12,M.gold);
- }else if(kind==="BOBI"){
-  const bag=box(body,.85,.05,-.35,.55,.65,.6,mat(0x9a6138));
-  sphere(body,.85,.42,-.35,.28,.13,.3,accent);
- }else if(kind==="LALA"){
-  sphere(body,-.5,.55,-.2,.22,.22,.22,mat(0xffd9e8));
-  sphere(body,.5,.55,-.2,.22,.22,.22,mat(0xffd9e8));
- }else if(kind==="TORA"){
-  box(body,0,.3,-.2,1.65,.65,.3,mat(0x526c85));
-  sphere(body,0,.4,.35,.35,.28,.12,M.gold);
- }
- root.userData.body=body;
- root.userData.head=head;
- root.userData.kind=kind;
- root.userData.phase=Math.random()*5;
- root.userData.tail=tail;
- return root;
-}
+    </div>
 
-// Pemain
-let currentHero="LALA";
-let player=makeDino("LALA",.72);
-player.position.set(0,0,3);
-const followers=[];
-function addFollowers(){
- followers.forEach(f=>scene.remove(f));followers.length=0;
- Object.keys(heroDefs).filter(k=>k!==currentHero).forEach((k,i)=>{
-  const f=makeDino(k,.49);f.position.set(-3+i*2,0,6+i%2);scene.add(f);followers.push(f);
- });
-}
-addFollowers();
+    <!-- SENARAI MISI -->
+    <div id="mission-panel">
 
-// NPC
-function makeNPC(x,z,color=0x9b704c){
- const n=makeDino("LALA",.55);
- n.traverse(o=>{if(o.isMesh&&o.material&&o.material.color)o.material=o.material.clone();});
- n.position.set(x,0,z);scene.add(n);return n;
-}
-const chief=makeNPC(2, -12,0);
-const keeper=makeNPC(-57,28);
-const babies=[];
-for(let i=0;i<3;i++){
- const b=makeDino("LALA",.35);
- b.position.set(-40+i*5,-0.05,-35+i*4);scene.add(b);babies.push(b);
-}
-const wild=[];
-for(let i=0;i<4;i++){
- const w=makeDino(i%2?"TORA":"BOBI",.55);
- w.position.set(25+i*7,0,10+i*5);scene.add(w);wild.push(w);
-}
+      <div class="mission-heading">
+        🎯 MISI PENGEMBARAAN
+      </div>
 
-// Kristal dan telur
-const crystals=[],eggs=[];
-function makeCrystal(x,z){
- const g=group(scene,x,0,z);
- const c=mesh(new THREE.OctahedronGeometry(.75,0),M.crystal,g,0,1,0);
- c.rotation.z=.2;
- const glow=mesh(new THREE.TorusGeometry(.9,.07,5,12),M.gold,g,0,.5,0);
- glow.rotation.x=Math.PI/2;
- crystals.push({group:g,mesh:c,taken:false});
-}
-for(let i=0;i<8;i++)makeCrystal(-47+(i%4)*7,-12+Math.floor(i/4)*12);
-function makeEgg(x,z){
- const e=group(scene,x,0,z);
- sphere(e,0,.48,0,.48,.62,.43,mat(0xffe5a5));
- for(let i=0;i<3;i++)sphere(e,(i-1)*.18,.65,.37,.07,.07,.04,M.gold);
- eggs.push({group:e,taken:false});
-}
-makeEgg(18,12);makeEgg(26,18);makeEgg(32,8);
+      <div class="mission-item">
+        1. Bantu anak dinosaur
+      </div>
 
-// Item penanda misi
-const markers=[];
-function marker(x,z,color=0xffd84a){
- const g=group(scene,x,0,z);
- const ring=mesh(new THREE.TorusGeometry(1.4,.09,6,20),mat(color,.4),g,0,.12,0);
- ring.rotation.x=Math.PI/2;
- const beam=mesh(new THREE.CylinderGeometry(.05,.05,4,6),mat(color),g,0,2,0);
- beam.material.transparent=true;beam.material.opacity=.25;
- markers.push(g);return g;
-}
-marker(2,-12,0xffe36a);
-marker(-40,-35,0x71ffab);
-marker(-57,28,0x53e8ff);
-marker(72,-68,0xff5a49);
+      <div class="mission-item">
+        2. Kumpulkan telur dinosaur
+      </div>
 
-// Bos
-const boss=makeDino("TORA",1.8);
-boss.position.set(76,0,-68);
-boss.traverse(o=>{if(o.isMesh&&o.material&&o.material.color)o.material=o.material.clone();});
-boss.visible=false;
-const bossHealth=box(scene,76,5,-68,5,.35,.25,mat(0xff3030));
-bossHealth.visible=false;
-let bossHP=5;
+      <div class="mission-item">
+        3. Cari kristal ajaib
+      </div>
 
-// Misi
-const missions=[
- {id:0,text:"Bercakap dengan ketua kampung"},
- {id:1,text:"Selamatkan 3 anak dinosaur"},
- {id:2,text:"Kutip 3 telur dinosaur"},
- {id:3,text:"Kumpul 8 kristal ajaib"},
- {id:4,text:"Bercakap dengan penjaga sungai"},
- {id:5,text:"Pergi ke kawasan gunung berapi"},
- {id:6,text:"Cari Raja Bayang di lembah"},
- {id:7,text:"Kalahkan Raja Bayang"}
-];
-let missionDone=new Set();
-let babiesSaved=0,eggsGot=0,crystalsGot=0;
-let bossActive=false,bossDefeated=false;
-let soundOn=false;
-let lastVoice=0;
-let actionMessage="";
-let gameStarted=false;
+      <div class="mission-item">
+        4. Jumpa penjaga sungai
+      </div>
 
-function updateMissions(){
- $("missionList").innerHTML="";
- missions.forEach(m=>{
-  if(!missionDone.has(m.id)){
-   const div=document.createElement("div");
-   div.className="mission";
-   div.textContent="◉ "+m.text;
-   $("missionList").appendChild(div);
-  }
- });
- if(missionDone.size===missions.length){
-  $("missionList").textContent="🏆 SEMUA MISI SELESAI!";
- }
-}
-function complete(id){
- if(missionDone.has(id))return;
- missionDone.add(id);updateMissions();
- const words={
-  0:"Bagus! Ketua kampung sudah ditemui. Sekarang selamatkan tiga anak dinosaur.",
-  1:"Syabas! Semua anak dinosaur selamat. Cari tiga telur dinosaur pula.",
-  2:"Hebat! Telur sudah dikumpulkan. Cari lapan kristal ajaib.",
-  3:"Cemerlang! Semua kristal sudah dikumpulkan. Cari penjaga sungai.",
-  4:"Bagus! Sekarang pergi ke gunung berapi.",
-  5:"Wah! Kamu sudah sampai ke kawasan gunung berapi. Cari Raja Bayang.",
-  6:"Kamu sudah jumpa Raja Bayang! Gunakan kuasa untuk mengalahkannya.",
-  7:"Tahniah! Raja Bayang sudah dikalahkan. Kamu penyelamat Jurassic Kingdom!"
- };
- say(words[id],true);
-}
-function say(text,force=false){
- if(!soundOn)return;
- const now=Date.now();
- if(!force&&now-lastVoice<1800)return;
- lastVoice=now;
- if(!("speechSynthesis" in window))return;
- speechSynthesis.cancel();
- const u=new SpeechSynthesisUtterance(text);
- u.lang="ms-MY";u.rate=.92;u.pitch=1.08;
- const voices=speechSynthesis.getVoices();
- const ms=voices.find(v=>v.lang.toLowerCase().startsWith("ms"));
- if(ms)u.voice=ms;
- speechSynthesis.speak(u);
-}
-$("sound").onclick=()=>{
- soundOn=!soundOn;
- $("sound").textContent=soundOn?"🔊 SUARA: ON":"🔇 SUARA: OFF";
- if(soundOn)say("Suara permainan dihidupkan. Selamat datang ke Jurassic Kingdom!",true);
- else if("speechSynthesis"in window)speechSynthesis.cancel();
-};
+      <div class="mission-item">
+        5. Teroka hutan purba
+      </div>
 
-// Tukar wira
-function chooseHero(kind){
- if(!heroDefs[kind])return;
- const pos=player.position.clone();
- scene.remove(player);
- currentHero=kind;
- player=makeDino(kind,.72);
- player.position.copy(pos);
- $("heroTag").textContent=heroDefs[kind].name+" – "+heroDefs[kind].title;
- document.querySelectorAll(".heroBtn").forEach(b=>b.classList.toggle("selected",b.dataset.hero===kind));
- addFollowers();
- say(heroDefs[kind].dialog,true);
-}
-document.querySelectorAll(".heroBtn").forEach(b=>b.addEventListener("click",()=>chooseHero(b.dataset.hero)));
+      <div class="mission-item">
+        6. Pergi ke gunung berapi
+      </div>
 
-// Kawalan
-const keys={forward:false,back:false,left:false,right:false};
-document.querySelectorAll("[data-move]").forEach(b=>{
- const k=b.dataset.move;
- const on=e=>{e.preventDefault();keys[k]=true;b.classList.add("active");};
- const off=e=>{e.preventDefault();keys[k]=false;b.classList.remove("active");};
- b.addEventListener("pointerdown",on);
- b.addEventListener("pointerup",off);
- b.addEventListener("pointerleave",off);
- b.addEventListener("pointercancel",off);
-});
-window.addEventListener("keydown",e=>{
- if(e.key==="ArrowUp"||e.key==="w")keys.forward=true;
- if(e.key==="ArrowDown"||e.key==="s")keys.back=true;
- if(e.key==="ArrowLeft"||e.key==="a")keys.left=true;
- if(e.key==="ArrowRight"||e.key==="d")keys.right=true;
-});
-window.addEventListener("keyup",e=>{
- if(e.key==="ArrowUp"||e.key==="w")keys.forward=false;
- if(e.key==="ArrowDown"||e.key==="s")keys.back=false;
- if(e.key==="ArrowLeft"||e.key==="a")keys.left=false;
- if(e.key==="ArrowRight"||e.key==="d")keys.right=false;
-});
+      <div class="mission-item">
+        7. Hadapi Raja Dinosaur
+      </div>
 
-let jumpV=0,onGround=true;
-$("jump").addEventListener("pointerdown",e=>{
- e.preventDefault();if(onGround){jumpV=.19;onGround=false;}
-});
-$("interact").addEventListener("pointerdown",e=>{e.preventDefault();interact();});
-$("attack").addEventListener("pointerdown",e=>{e.preventDefault();attack();});
+    </div>
 
-// Interaksi berhampiran
-function dist(a,b){return a.position.distanceTo(b.position)}
-function interact(){
- if(missionDone.has(0)&&missionDone.has(1)&&missionDone.has(2)&&missionDone.has(3)&&!missionDone.has(4)&&dist(player,keeper)<9){
-  complete(4);return;
- }
- if(!missionDone.has(0)&&dist(player,chief)<9){complete(0);return;}
- if(missionDone.has(6)&&bossActive&&dist(player,boss)<12){
-  attack();return;
- }
- if(missionDone.has(5)&&!missionDone.has(6)&&player.position.x>62&&player.position.z<-48){
-  complete(6);bossActive=true;boss.visible=true;bossHealth.visible=true;return;
- }
- say("Teruskan bergerak untuk mencari tugasan.",true);
-}
+    <!-- KAWALAN SENTUH -->
+    <div id="touch-controls">
 
-// Kuasa wira dan serangan bos
-let powerCooldown=0;
-function attack(){
- if(powerCooldown>0)return;
- powerCooldown=1.1;
- if(bossActive&&!bossDefeated&&dist(player,boss)<15){
-  bossHP--;
-  bossHealth.scale.x=Math.max(.1,bossHP/5);
-  bossHealth.position.x=76-(5-bossHP)*.5;
-  say("Serang lagi! Kita boleh!",true);
-  if(bossHP<=0){
-   bossDefeated=true;boss.visible=false;bossHealth.visible=false;
-   complete(7);
-  }
-  return;
- }
- if(currentHero==="LALA"){
-  say("Kuasa penyayang! Kita bantu semua kawan!",true);
-  const aura=mesh(new THREE.SphereGeometry(2,10,8),mat(0x8dffae,.3),scene,player.position.x,1,player.position.z);
-  aura.material.transparent=true;aura.material.opacity=.35;
-  setTimeout(()=>scene.remove(aura),700);
- }else if(currentHero==="TORA"){
-  say("Perisai keberanian! Aku tidak akan mengalah!",true);
- }else if(currentHero==="REX"){
-  say("Ikut arahan ketua! Kita bekerjasama!",true);
- }else{
-  say("Kuasa alam! Mari kita lindungi bumi!",true);
- }
-}
-function updateCounters(){
- $("crystalCount").textContent=crystalsGot;
- $("eggCount").textContent=eggsGot;
- $("babyCount").textContent=babiesSaved;
-}
+      <!-- ARAH -->
+      <div class="control-group">
 
-// Pergerakan dan kutipan item
-let moving=false;
-function updatePlayer(dt,time){
- let dx=0,dz=0;
- if(keys.forward)dz-=1;
- if(keys.back)dz+=1;
- if(keys.left)dx-=1;
- if(keys.right)dx+=1;
- const len=Math.hypot(dx,dz);
- moving=len>0;
- if(len){dx/=len;dz/=len;}
- const speed=.16;
- player.position.x+=dx*speed*dt*60;
- player.position.z+=dz*speed*dt*60;
- player.position.x=THREE.MathUtils.clamp(player.position.x,-91,91);
- player.position.z=THREE.MathUtils.clamp(player.position.z,-88,88);
- if(moving){
-  player.rotation.y=Math.atan2(dx,dz);
- }
- if(!onGround||jumpV!==0){
-  player.position.y+=jumpV*dt*60;
-  jumpV-=.009*dt*60;
-  if(player.position.y<=0){player.position.y=0;jumpV=0;onGround=true;}
- }
- const phase=time*.012;
- player.userData.body.position.y=1.35+(moving?Math.abs(Math.sin(phase*2))*.08:Math.sin(phase)*.035);
- player.userData.legs.forEach((leg,i)=>{leg.rotation.x=moving?Math.sin(phase*2+i*Math.PI)*.45:Math.sin(phase+i)*.025;});
- player.userData.arms.forEach((arm,i)=>{arm.rotation.x=moving?Math.sin(phase*2+i*Math.PI)*.25:0;});
- player.userData.tail.rotation.z=Math.sin(phase)*.12;
- player.userData.head.rotation.x=Math.sin(phase*.6)*.035;
+        <button id="left-btn" class="control-button">
+          ◀
+        </button>
 
- // Rakan mengikuti pemain
- followers.forEach((f,i)=>{
-  const target=new THREE.Vector3(player.position.x+(i-1)*2.4,0,player.position.z+3+(i%2)*1.4);
-  f.position.lerp(target,.035);
-  const vx=player.position.x-f.position.x,vz=player.position.z-f.position.z;
-  if(Math.hypot(vx,vz)>.5)f.rotation.y=Math.atan2(vx,vz);
-  f.userData.body.position.y=1.35+Math.sin(time*.009+i)*.05;
-  f.userData.legs.forEach((leg,j)=>leg.rotation.x=Math.sin(time*.012+j+i)*.12);
- });
+        <div style="display:flex;flex-direction:column;gap:7px;">
 
- // Kristal
- crystals.forEach(c=>{
-  if(c.taken)return;
-  c.group.rotation.y+=.012*dt*60;
-  c.mesh.position.y=1+Math.sin(time*.004+c.group.position.x)*.2;
-  if(dist(player,c.group)<2.2){
-   c.taken=true;scene.remove(c.group);crystalsGot++;updateCounters();
-   say("Kristal ajaib berjaya dikutip!");
-   if(crystalsGot>=8)complete(3);
-  }
- });
- eggs.forEach(e=>{
-  if(e.taken)return;
-  e.group.rotation.y+=.01*dt*60;
-  if(dist(player,e.group)<2.2){
-   e.taken=true;scene.remove(e.group);eggsGot++;updateCounters();
-   say("Telur dinosaur berjaya dikutip!");
-   if(eggsGot>=3)complete(2);
-  }
- });
- babies.forEach(b=>{
-  if(b.userData.saved)return;
-  b.userData.body.position.y=1.35+Math.sin(time*.006+b.position.x)*.06;
-  if(dist(player,b)<3){
-   b.userData.saved=true;scene.remove(b);babiesSaved++;updateCounters();
-   say("Bagus! Seekor anak dinosaur telah diselamatkan!",true);
-   if(babiesSaved>=3)complete(1);
-  }
- });
- if(!missionDone.has(5)&&player.position.x>35&&player.position.z<-25&&missionDone.has(4))complete(5);
- if(missionDone.has(5)&&!missionDone.has(6)&&player.position.x>65&&player.position.z<-58){
-  complete(6);bossActive=true;boss.visible=true;bossHealth.visible=true;
- }
- if(bossActive&&!bossDefeated){
-  const v=new THREE.Vector3(player.position.x-boss.position.x,0,player.position.z-boss.position.z);
-  if(v.length()>5){boss.position.add(v.normalize().multiplyScalar(.025*dt*60));boss.rotation.y=Math.atan2(v.x,v.z);}
-  boss.userData.body.position.y=2.4+Math.sin(time*.006)*.08;
-  bossHealth.position.set(boss.position.x,5.8,boss.position.z);
- }
- if(powerCooldown>0)powerCooldown-=dt;
-}
+          <button id="up-btn" class="control-button">
+            ▲
+          </button>
 
-// Animasi dunia
-function animateWorld(time,dt){
- crystals.forEach(c=>{if(!c.taken)c.group.position.y=Math.sin(time*.002+c.group.position.x)*.12;});
- markers.forEach(m=>{m.rotation.y+=.008*dt*60;});
- trees.forEach((t,i)=>{t.rotation.z=Math.sin(time*.0005+i)*.015;});
- waterfall.position.y=3+Math.sin(time*.004)*.12;
- wild.forEach((w,i)=>{
-  w.position.x+=Math.sin(time*.0005+i)*.006*dt*60;
-  w.position.z+=Math.cos(time*.0005+i)*.006*dt*60;
-  w.userData.body.position.y=1.35+Math.sin(time*.006+i)*.06;
-  w.userData.legs.forEach((leg,j)=>leg.rotation.x=Math.sin(time*.007+j+i)*.12);
- });
-}
+          <button id="down-btn" class="control-button">
+            ▼
+          </button>
 
-// Kamera mengikuti pemain
-function updateCamera(dt){
- const behind=new THREE.Vector3(0,8.8,13.5);
- const rot=new THREE.Vector3(Math.sin(player.rotation.y)*10,0,Math.cos(player.rotation.y)*10);
- behind.x+=rot.x;behind.z+=rot.z;
- const target=new THREE.Vector3(player.position.x+behind.x,player.position.y+behind.y,player.position.z+behind.z);
- camera.position.lerp(target,.075);
- camera.lookAt(player.position.x,1.7,player.position.z);
-}
+        </div>
 
-// Resize
-function resize(){
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
-}
-window.addEventListener("resize",resize);
-window.addEventListener("orientationchange",resize);
+        <button id="right-btn" class="control-button">
+          ▶
+        </button>
 
-// Mula
-$("startBtn").onclick=async()=>{
- $("start").style.display="none";
- gameStarted=true;
- try{
-  if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock("landscape");
- }catch(e){}
- say("Selamat datang ke Jurassic Kingdom! Mari kita mulakan pengembaraan.",true);
-};
+      </div>
 
-updateMissions();
-updateCounters();
+      <!-- LOMPAT DAN AKSI -->
+      <div class="control-group">
 
-let last=performance.now(),frame=0;
-function loop(now){
- requestAnimationFrame(loop);
- const dt=Math.min((now-last)/1000,.04);last=now;
- if(!gameStarted){renderer.render(scene,camera);return;}
- frame++;
- updatePlayer(dt,now);
- animateWorld(now,dt);
- updateCamera(dt);
- renderer.render(scene,camera);
-}
-requestAnimationFrame(loop);
+        <button id="jump-btn"
+                class="control-button action-button">
+          LOMPAT
+        </button>
 
-})();
-</script>
+        <button id="action-btn"
+                class="control-button action-button">
+          AKSI
+        </button>
+
+        <button id="power-btn"
+                class="control-button action-button power-button">
+          KUASA
+        </button>
+
+      </div>
+
+    </div>
+
+    <div id="voice-indicator">
+      🗣️ Suara pengembaraan
+    </div>
+
+  </div>
+
+  <!-- PAPARAN LOADING -->
+  <div id="loading-screen">
+
+    <div style="font-size:26px;">
+      MEMUATKAN DUNIA JURASSIC...
+    </div>
+
+    <div class="loading-bar">
+      <div id="loading-progress"></div>
+    </div>
+
+    <div style="font-size:13px;">
+      Bersedia untuk pengembaraan!
+    </div>
+
+  </div>
+
+  <!-- ENJIN PERMAINAN -->
+  <script type="module" src="game.js"></script>
+
 </body>
 </html>
