@@ -3,50 +3,57 @@
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Magical Jurassic Kingdom V2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Magical Jurassic Kingdom V3</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;font-family:Arial}
-canvas{display:block}
-#hud{position:fixed;top:10px;left:10px;right:10px;
-display:flex;justify-content:space-between;z-index:3;
-color:white;font-weight:bold}
-.panel{background:#32175be8;padding:10px 13px;
-border:2px solid #e5baff;border-radius:14px;font-size:13px}
-#message{position:fixed;top:65px;left:50%;
-transform:translateX(-50%);background:#fff1b9;
-color:#542b7d;padding:9px 13px;border-radius:12px;
-font-size:12px;font-weight:bold;z-index:3}
-#controls{position:fixed;bottom:15px;left:12px;right:12px;
-display:flex;justify-content:space-between;z-index:4}
-.pad{display:grid;grid-template-columns:52px 52px 52px;gap:5px}
-button{background:#ffffffd9;border:2px solid white;
-color:#45236c;border-radius:15px;font-size:22px;
-font-weight:bold;touch-action:none}
-.pad button{height:52px}
-#up{grid-column:2}#left{grid-column:1}
-#down{grid-column:2}#right{grid-column:3}
-#jump,#magic{width:65px;height:65px;border-radius:50%;
-font-size:12px}
-#jump{position:fixed;right:91px;bottom:25px;
-background:#ffe18a;z-index:4}
-#magic{background:#dcb3ff}
-#win{display:none;position:fixed;inset:0;
-background:#160b36df;z-index:8;
-align-items:center;justify-content:center;text-align:center}
-#win div{background:#fff0c8;padding:28px;
-border-radius:24px;color:#49266b}
+body{margin:0;overflow:hidden;background:#10152c;font-family:Arial,sans-serif;color:white}
+#game{width:100vw;height:100vh;display:block}
+#top{
+ position:absolute;top:10px;left:10px;right:10px;
+ display:flex;justify-content:space-between;gap:8px;pointer-events:none
+}
+.panel{background:#171b36dd;border:1px solid #ffffff40;border-radius:12px;padding:9px 12px;font-size:13px}
+#message{
+ position:absolute;top:70px;left:50%;transform:translateX(-50%);
+ background:#211b43ee;border:1px solid #e7caff;border-radius:14px;
+ padding:12px 18px;text-align:center;max-width:85%;font-size:14px;
+ display:none
+}
+#controls{position:absolute;bottom:18px;left:15px;right:15px;display:flex;justify-content:space-between;align-items:end}
+.pad{display:grid;grid-template-columns:55px 55px 55px;grid-template-rows:50px 50px;gap:5px}
+button{
+ border:1px solid #ffffff70;border-radius:13px;background:#342c68dd;
+ color:white;font-weight:bold;font-size:13px;padding:10px;touch-action:none
+}
+button:active{background:#9364d9}
+.pad button{font-size:22px;padding:0}
+#up{grid-column:2;grid-row:1}#left{grid-column:1;grid-row:2}
+#down{grid-column:2;grid-row:2}#right{grid-column:3;grid-row:2}
+.actions{display:grid;grid-template-columns:repeat(2,auto);gap:7px}
+.actions button{min-width:75px;min-height:43px}
+#costumes{position:absolute;top:66px;right:10px;display:flex;gap:5px}
+#costumes button{font-size:11px;padding:8px}
+#hint{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);font-size:11px;color:#fff;background:#171b36bb;padding:7px 10px;border-radius:10px}
 </style>
 </head>
 <body>
+<canvas id="game"></canvas>
 
-<div id="hud">
- <div class="panel">🏰 MAGICAL KINGDOM</div>
- <div class="panel">💎 <span id="score">0</span>/10</div>
+<div id="top">
+ <div class="panel">💎 Kristal: <span id="crystals">0</span>/10<br>🥚 Telur: <span id="eggs">0</span>/5</div>
+ <div class="panel">❤️ Bos: <span id="bossHP">100</span>%<br>🐉 <span id="mode">Berjalan</span></div>
 </div>
 
-<div id="message">Cari kristal dan telur dinosaur!</div>
+<div id="message"></div>
+
+<div id="costumes">
+ <button onclick="changeCostume(0)">🧙 Sihir</button>
+ <button onclick="changeCostume(1)">🛡️ Kesatria</button>
+ <button onclick="changeCostume(2)">👑 Diraja</button>
+</div>
+
+<div id="hint">Cari kristal, telur dan istana ajaib!</div>
 
 <div id="controls">
  <div class="pad">
@@ -55,503 +62,309 @@ border-radius:24px;color:#49266b}
   <button id="down">▼</button>
   <button id="right">▶</button>
  </div>
- <button id="magic">✨ SIHIR</button>
-</div>
-<button id="jump">LOMPAT</button>
-
-<div id="win">
- <div>
-  <div style="font-size:55px">👑</div>
-  <h2>WIRA MAGIK!</h2>
-  <p>Kau berjaya mengumpul semua kristal!</p>
-  <button onclick="location.reload()">MAIN LAGI</button>
+ <div class="actions">
+  <button id="jump">⬆ LOMPAT</button>
+  <button id="magic">✨ SIHIR</button>
+  <button id="ride">🐉 NAIK NAGA</button>
+  <button id="interact">🏰 GUNA</button>
  </div>
 </div>
 
-<script type="module">
-import * as THREE from
-'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+let scene,camera,renderer,clock;
+let player,dragon,boss,castle,door;
+let crystals=[],eggs=[],spells=[];
+let keys={},jumping=false,velocityY=0;
+let riding=false,crystalCount=0,eggCount=0,bossHealth=100;
+let costume=0,castleInside=false;
+let messageTimer;
 
-// =============================
-// 1. DUNIA 3D
-// =============================
-
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x8bdcf5);
-scene.fog=new THREE.Fog(0x8bdcf5,35,90);
-
-const camera=new THREE.PerspectiveCamera(
-65,innerWidth/innerHeight,.1,200);
-
-const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
-renderer.shadowMap.enabled=true;
-document.body.appendChild(renderer.domElement);
-
-scene.add(new THREE.HemisphereLight(0xffffff,0x625080,2));
-
-const sun=new THREE.DirectionalLight(0xffe6b0,2.5);
-sun.position.set(12,25,12);
-sun.castShadow=true;
-scene.add(sun);
-
-// =============================
-// 2. FUNGSI OBJEK
-// =============================
-
-const mat=c=>new THREE.MeshStandardMaterial({color:c});
-
-function box(parent,x,y,z,w,h,d,c){
-const o=new THREE.Mesh(
-new THREE.BoxGeometry(w,h,d),mat(c));
-o.position.set(x,y,z);
-o.castShadow=true;
-parent.add(o);
-return o;
+const $=id=>document.getElementById(id);
+function say(t){
+ const m=$("message");m.textContent=t;m.style.display="block";
+ clearTimeout(messageTimer);
+ messageTimer=setTimeout(()=>m.style.display="none",3500);
 }
-
-function ball(parent,x,y,z,r,c){
-const o=new THREE.Mesh(
-new THREE.SphereGeometry(r,16,12),mat(c));
-o.position.set(x,y,z);
-o.castShadow=true;
-parent.add(o);
-return o;
+function mat(c,rough=.8){return new THREE.MeshStandardMaterial({color:c,roughness:rough})}
+function box(parent,x,y,z,w,h,d,color){
+ const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(color));
+ o.position.set(x,y,z);parent.add(o);return o;
 }
-
-function cone(parent,x,y,z,r,h,c){
-const o=new THREE.Mesh(
-new THREE.ConeGeometry(r,h,8),mat(c));
-o.position.set(x,y,z);
-o.castShadow=true;
-parent.add(o);
-return o;
+function sphere(parent,x,y,z,r,color){
+ const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),mat(color));
+ o.position.set(x,y,z);parent.add(o);return o;
 }
-
-// =============================
-// 3. PULAU
-// =============================
-
-box(scene,0,-.7,0,42,1.4,34,0x926a45);
-box(scene,0,.02,0,41.5,.2,33.5,0x51aa52);
-box(scene,0,-1.5,0,120,.1,120,0x168ec2);
-
-// Sungai
-box(scene,-8,.12,0,3,.04,28,0x39c9ec);
-
-// Batu sungai
-for(let z=-12;z<14;z+=2){
-ball(scene,-6,.2,z,.4,0x92978d);
-ball(scene,-10,.2,z,.4,0x92978d);
+function cylinder(parent,x,y,z,rt,rb,h,color){
+ const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,12),mat(color));
+ o.position.set(x,y,z);parent.add(o);return o;
 }
-
-// =============================
-// 4. ISTANA
-// =============================
-
-function tower(x,z){
-box(scene,x,2,z,3,4,3,0xeac5e9);
-cone(scene,x,5,z,2,2.5,0x71399c);
+function makeDino(){
+ const g=new THREE.Group();
+ const green=mat(0x63d69b), belly=mat(0xffd68a), dark=mat(0x287e69);
+ sphere(g,0,1.15,0,.65,0x63d69b);
+ sphere(g,0,1.85,.18,.55,0x73e5b0);
+ sphere(g,-.22,1.95,.62,.10,0xffffff);
+ sphere(g,.22,1.95,.62,.10,0xffffff);
+ sphere(g,-.22,1.95,.71,.045,0x17152a);
+ sphere(g,.22,1.95,.71,.045,0x17152a);
+ sphere(g,0,1.65,.68,.13,0xffa0a0);
+ sphere(g,0,1.1,.58,.39,0xffd68a);
+ const tail=sphere(g,0,1,-.85,.22,0x287e69);tail.scale.set(.7,.7,2.2);
+ for(let x of [-.35,.35]){
+  box(g,x,.48,0,.25,.75,.28,0x48b982);
+ }
+ const robe=cylinder(g,0,1.1,0,.57,.75,.85,0x7549c7);
+ robe.material=mat(0x7549c7);
+ const hat=new THREE.Group();g.add(hat);
+ cylinder(hat,0,2.48,.12,.02,.35,.65,0x6037a8);
+ cylinder(hat,0,2.15,.12,.43,.43,.12,0x3e247e);
+ sphere(hat,.2,2.25,.18,.08,0xffe36b);
+ const staff=box(g,.85,1.1,.25,.08,1.5,.08,0x8b542c);
+ sphere(g,.85,1.9,.25,.19,0x8b5cff);
+ g.userData={robe,hat,staff};
+ return g;
 }
-
-box(scene,10,2,-8,12,4,3,0xe7b8dc);
-box(scene,10,4,-8,12,.3,3.5,0x68318d);
-tower(5,-8);
-tower(15,-8);
-box(scene,10,1,-6.3,2,2,.15,0x593273);
-
-// Menara kecil
-tower(-13,-12);
-
-// =============================
-// 5. POKOK AJAIB
-// =============================
-
+function makeDragon(){
+ const g=new THREE.Group();
+ sphere(g,0,0,0,.75,0x9d70ff);
+ sphere(g,0,.1,.65,.4,0xb58bff);
+ sphere(g,-.17,.2,.96,.09,0xffffff);
+ sphere(g,.17,.2,.96,.09,0xffffff);
+ sphere(g,-.17,.2,1.03,.04,0x17152a);
+ sphere(g,.17,.2,1.03,.04,0x17152a);
+ const tail=sphere(g,0,-.1,-1,.18,0x8052d8);tail.scale.set(.7,.7,2);
+ const wings=[];
+ for(let s of [-1,1]){
+  const w=box(g,s*.75,.25,-.1,.9,.08,.75,0x7145c9);
+  w.rotation.z=s*.5;wings.push(w);
+ }
+ g.userData={wings};
+ return g;
+}
 function tree(x,z){
-const t=box(scene,x,.9,z,.35,1.8,.35,0x79502e);
-ball(scene,x,2.1,z,1.1,0x32a75b);
-ball(scene,x-.6,2,z,.65,0x45c77b);
-ball(scene,x+.6,2,z,.65,0x45c77b);
-ball(scene,x,2.7,z,.12,0xffe77a);
+ const g=new THREE.Group();
+ cylinder(g,0,1,0,.2,.3,2,0x75472d);
+ sphere(g,0,2.3,0,1.05,0x2a9b6b);
+ sphere(g,.6,2.5,.1,.65,0x42c887);
+ g.position.set(x,0,z);scene.add(g);
 }
-
-for(let i=0;i<25;i++){
-let x=Math.random()*34-17;
-let z=Math.random()*26-13;
-if(Math.abs(x)>7)tree(x,z);
+function makeCrystal(x,z){
+ const g=new THREE.Group();
+ const c=new THREE.Mesh(new THREE.OctahedronGeometry(.55),mat(0x55f4ff,.25));
+ c.position.y=1;g.add(c);
+ const glow=new THREE.PointLight(0x44eaff,1.5,5);glow.position.y=1;g.add(glow);
+ g.position.set(x,0,z);scene.add(g);crystals.push(g);
 }
-
-// Cendawan
-for(let i=0;i<8;i++){
-let x=Math.random()*28-14;
-let z=Math.random()*22-11;
-box(scene,x,.7,z,.3,1.4,.3,0xf4d5b5);
-ball(scene,x,1.5,z,.8,0xe96cad);
+function makeEgg(x,z){
+ const g=new THREE.Group();
+ const e=new THREE.Mesh(new THREE.SphereGeometry(.38,16,12),mat(0xffd34f));
+ e.scale.y=1.25;e.position.y=.45;g.add(e);
+ sphere(g,0,.5,.32,.09,0xff704d);
+ g.position.set(x,0,z);scene.add(g);eggs.push(g);
 }
+function init(){
+ scene=new THREE.Scene();scene.background=new THREE.Color(0x8bdcff);
+ scene.fog=new THREE.Fog(0x8bdcff,35,100);
+ camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,200);
+ renderer=new THREE.WebGLRenderer({canvas:$("game"),antialias:true});
+ renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+ renderer.shadowMap.enabled=true;
+ clock=new THREE.Clock();
+ scene.add(new THREE.HemisphereLight(0xffffff,0x49734b,2));
+ const sun=new THREE.DirectionalLight(0xffffff,2);sun.position.set(15,25,10);scene.add(sun);
 
-// =============================
-// 6. WATAK DINOSAUR
-// =============================
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(150,150),mat(0x4fbd79));
+ ground.rotation.x=-Math.PI/2;ground.position.y=-.08;scene.add(ground);
+ // Laluan batu
+ for(let i=0;i<18;i++)box(scene,0,.01,12-i*2.3,2.8,.12,1.7,0xb7a58b);
+ // Pokok dan cendawan
+ for(let i=0;i<42;i++){
+  let x=(Math.random()-.5)*65,z=(Math.random()-.5)*65;
+  if(Math.abs(x)<5&&z> -25&&z<15)continue;
+  tree(x,z);
+ }
+ for(let i=0;i<12;i++){
+  const x=(Math.random()-.5)*35,z=(Math.random()-.5)*35;
+  cylinder(scene,x,.35,z,.18,.25,.7,0xff6b9d);
+  sphere(scene,x,.75,z,.4,0xffa5c8);
+ }
+ // Gunung dan gunung berapi
+ const volcano=new THREE.Mesh(new THREE.ConeGeometry(8,13,8),mat(0x66505b));
+ volcano.position.set(-23,6,-28);scene.add(volcano);
+ const lava=sphere(scene,-23,11.5,-28,1.4,0xff632e);
+ // Istana
+ castle=new THREE.Group();castle.position.set(0,0,-32);scene.add(castle);
+ box(castle,0,3,0,12,6,7,0xeadcfb);
+ box(castle,0,1,3.56,2.2,2.8,.2,0x39234f);
+ door=new THREE.Group();door.position.set(0,0,3.8);castle.add(door);
+ box(door,0,1.3,0,1.8,2.6,.2,0x8e54bd);
+ for(let x of [-5,5]){
+  box(castle,x,5,0,2,10,2,0x9d76d6);
+  const roof=new THREE.Mesh(new THREE.ConeGeometry(1.7,3,4),mat(0x633ba1));
+  roof.position.set(x,11,0);castle.add(roof);
+ }
+ const roof=new THREE.Mesh(new THREE.ConeGeometry(7,4,4),mat(0x7549b7));
+ roof.position.set(0,8,0);castle.add(roof);
+ // Kristal
+ [[-8,0],[8,1],[-12,-12],[12,-15],[-18,12],[18,10],[-5,-22],[7,-25],[22,-5],[-22,-8]]
+ .forEach(p=>makeCrystal(p[0],p[1]));
+ [[-5,8],[5,12],[-14,-18],[14,-22],[0,-42]].forEach(p=>makeEgg(p[0],p[1]));
 
-function makeDino(bodyColor,robeColor,withHat=true){
+ player=makeDino();player.position.set(0,0,12);scene.add(player);
+ dragon=makeDragon();scene.add(dragon);dragon.visible=false;
 
-const d=new THREE.Group();
+ // Bos dinosaur gelap
+ boss=new THREE.Group();
+ sphere(boss,0,1.2,0,1.1,0x4b294f);
+ sphere(boss,0,2,.2,.8,0x63335f);
+ for(let x of [-.3,.3])sphere(boss,x,2.1,.85,.13,0xff3030);
+ const horns=[];
+ for(let x of [-.55,.55]){
+  const h=new THREE.Mesh(new THREE.ConeGeometry(.22,.9,8),mat(0xe9c7ff));
+  h.position.set(x,2.8,.1);boss.add(h);
+ }
+ boss.position.set(15,0,-18);scene.add(boss);
 
-ball(d,0,.95,0,.72,bodyColor);
-ball(d,0,1.75,.05,.65,bodyColor);
-
-// Muncung
-ball(d,0,1.5,.53,.38,bodyColor);
-
-// Mata
-ball(d,-.25,1.9,.57,.14,0xffffff);
-ball(d,.25,1.9,.57,.14,0xffffff);
-ball(d,-.25,1.9,.7,.065,0x222033);
-ball(d,.25,1.9,.7,.065,0x222033);
-
-// Lubang hidung
-ball(d,-.13,1.55,.86,.055,0x25352a);
-ball(d,.13,1.55,.86,.055,0x25352a);
-
-// Jubah
-const robe=new THREE.Mesh(
-new THREE.CylinderGeometry(.4,.8,1.2,12),
-mat(robeColor));
-robe.position.y=.65;
-d.add(robe);
-
-// Ekor
-const tail=cone(d,0,.7,-1,.35,1.5,bodyColor);
-tail.rotation.x=-Math.PI/2;
-
-// Kaki
-const legs=[];
-for(let x of [-.24,.24]){
-const l=box(d,x,.15,0,.23,.55,.27,bodyColor);
-legs.push(l);
+ say("Selamat datang, wira kecil! Kumpulkan 10 kristal dan selamatkan kerajaan!");
+ animate();
 }
-
-// Topi
-if(withHat){
-ball(d,0,2.35,0,.58,robeColor);
-cone(d,0,2.9,0,.65,1.2,robeColor);
-ball(d,.25,2.65,.4,.12,0xffdf58);
+function changeCostume(n){
+ costume=n;
+ const r=player.userData.robe;
+ const h=player.userData.hat;
+ if(n===0){r.material=mat(0x7549c7);h.visible=true;player.userData.staff.visible=true;say("Kostum Ahli Sihir dipakai! ✨")}
+ if(n===1){r.material=mat(0x9c9caa);h.visible=false;player.userData.staff.visible=false;say("Kostum Kesatria dipakai! 🛡️")}
+ if(n===2){r.material=mat(0xe2b83e);h.visible=false;player.userData.staff.visible=true;say("Kostum Diraja dipakai! 👑")}
 }
-
-// Tongkat sihir
-if(withHat){
-const staff=new THREE.Group();
-d.add(staff);
-staff.position.set(.85,1,.1);
-
-box(staff,0,.5,0,.09,1.4,.09,0x80502c);
-ball(staff,0,1.3,0,.24,0x54eaff);
-ball(staff,0,1.3,0,.1,0xffffff);
-}
-
-return {group:d,legs,tail};
-}
-
-const hero=makeDino(0x65c77a,0x7739a5,true);
-scene.add(hero.group);
-hero.group.position.set(0,0,7);
-
-// Triceratops kesatria
-const knight=makeDino(0x83bd55,0x98632e,false);
-scene.add(knight.group);
-knight.group.position.set(6,0,5);
-
-// Tanduk kesatria
-cone(knight.group,-.48,1.9,.4,.14,.8,0xffedca);
-cone(knight.group,.48,1.9,.4,.14,.8,0xffedca);
-
-// Perisai
-box(knight.group,1,1,.3,.2,1,.8,0xe6b53d);
-
-// =============================
-// 7. NAGA TERBANG
-// =============================
-
-const dragon=new THREE.Group();
-scene.add(dragon);
-
-ball(dragon,0,0,0,.55,0x9c54d6);
-ball(dragon,0,.25,.5,.4,0xb77ce9);
-
-// Kepala
-ball(dragon,0,.4,.8,.38,0xb77ce9);
-ball(dragon,-.15,.48,1.1,.08,0xffffff);
-ball(dragon,.15,.48,1.1,.08,0xffffff);
-ball(dragon,-.15,.48,1.17,.04,0x222222);
-ball(dragon,.15,.48,1.17,.04,0x222222);
-
-// Sayap
-const wings=[];
-for(let s of [-1,1]){
-const w=new THREE.Mesh(
-new THREE.BoxGeometry(1.3,.08,1),
-mat(0xc68af0));
-w.position.set(s*.8,.3,0);
-dragon.add(w);
-wings.push({mesh:w,side:s});
-}
-
-// Ekor naga
-const dtail=cone(dragon,0,-.1,-.9,.22,.9,0x9c54d6);
-dtail.rotation.x=Math.PI/2;
-
-dragon.position.set(0,7,0);
-
-// =============================
-// 8. TELUR DINOSAUR
-// =============================
-
-const eggs=[];
-
-for(let i=0;i<5;i++){
-const egg=new THREE.Group();
-
-const e=new THREE.Mesh(
-new THREE.SphereGeometry(.38,16,12),
-mat(0xf1d9a4));
-e.scale.set(.8,1.2,.8);
-egg.add(e);
-
-for(let j=0;j<5;j++){
-ball(egg,
-(Math.random()-.5)*.35,
-(Math.random()-.5)*.7,
-.3,.045,0x7a55a9);
-}
-
-egg.position.set(
-Math.random()*28-14,.5,
-Math.random()*22-11);
-
-scene.add(egg);
-eggs.push(egg);
-}
-
-// =============================
-// 9. KRISTAL
-// =============================
-
-const gems=[];
-
-for(let i=0;i<10;i++){
-
-const g=new THREE.Mesh(
-new THREE.OctahedronGeometry(.45),
-new THREE.MeshStandardMaterial({
-color:0x55eaff,
-emissive:0x168aca,
-emissiveIntensity:2
-}));
-
-g.position.set(
-Math.random()*28-14,1,
-Math.random()*22-11);
-
-scene.add(g);
-gems.push(g);
-}
-
-// =============================
-// 10. KESAN MAGIK
-// =============================
-
-const sparkles=[];
-
-for(let i=0;i<65;i++){
-const p=new THREE.Mesh(
-new THREE.SphereGeometry(.07,6,6),
-new THREE.MeshBasicMaterial({color:0xffe77b}));
-p.position.set(
-Math.random()*34-17,
-Math.random()*8+1,
-Math.random()*30-15);
-scene.add(p);
-sparkles.push(p);
-}
-
-// Bola sihir
-const spells=[];
-
 function castSpell(){
-const s=new THREE.Mesh(
-new THREE.SphereGeometry(.28,12,12),
-new THREE.MeshBasicMaterial({color:0x7ef7ff}));
-s.position.copy(hero.group.position);
-s.position.y+=1.6;
-scene.add(s);
-spells.push({
-mesh:s,
-direction:new THREE.Vector3(
-Math.sin(hero.group.rotation.y),0,
-Math.cos(hero.group.rotation.y))
-});
+ const p=new THREE.Mesh(new THREE.SphereGeometry(.22,12,10),mat(0x9d6bff));
+ p.position.copy(player.position);p.position.y+=1.5;
+ const dir=new THREE.Vector3(0,0,-1).applyQuaternion(player.quaternion);
+ p.userData.dir=dir;spells.push(p);scene.add(p);
 }
-
-// =============================
-// 11. KAWALAN
-// =============================
-
-const keys={};
-
-function bind(id,key){
-const b=document.getElementById(id);
-b.addEventListener('pointerdown',e=>{
-e.preventDefault();
-keys[key]=true;
-b.setPointerCapture(e.pointerId);
-});
-['pointerup','pointercancel','lostpointercapture']
-.forEach(ev=>b.addEventListener(ev,()=>keys[key]=false));
+function toggleRide(){
+ riding=!riding;dragon.visible=riding;player.visible=!riding;
+ $("mode").textContent=riding?"Menunggang naga":"Berjalan";
+ say(riding?"Naga ajaib sedia terbang! 🐉":"Kembali berjalan.");
 }
-
-bind('up','up');
-bind('down','down');
-bind('left','left');
-bind('right','right');
-bind('jump','jump');
-
-addEventListener('keydown',e=>keys[e.key]=true);
-addEventListener('keyup',e=>keys[e.key]=false);
-
-document.getElementById('magic')
-.addEventListener('pointerdown',castSpell);
-
-// =============================
-// 12. ANIMASI
-// =============================
-
-let time=0,vy=0,ground=true;
-let score=0,eggCount=0;
-
+function interact(){
+ if(player.position.distanceTo(castle.position)<12){
+  castleInside=!castleInside;
+  if(castleInside){
+   player.position.set(0,0,-28);
+   say("Kamu memasuki istana! Puteri dinosaur: 'Tolong kalahkan naga gelap!'");
+  }else{
+   player.position.set(0,0,-20);
+   say("Kamu keluar dari istana. Teruskan pengembaraan!");
+  }
+ }else if(player.position.distanceTo(boss.position)<5){
+  say("Naga Gelap: 'Kamu tidak akan dapat kristal terakhir!' Serang dengan sihir!");
+ }else{
+  say("Cari istana di hadapan dan kumpulkan kristal ajaib!");
+ }
+}
+function bindHold(id,key){
+ const b=$(id);
+ b.addEventListener("pointerdown",e=>{e.preventDefault();keys[key]=true;b.setPointerCapture(e.pointerId)});
+ b.addEventListener("pointerup",()=>keys[key]=false);
+ b.addEventListener("pointercancel",()=>keys[key]=false);
+ b.addEventListener("lostpointercapture",()=>keys[key]=false);
+}
+bindHold("up","up");bindHold("down","down");bindHold("left","left");bindHold("right","right");
+$("jump").addEventListener("pointerdown",()=>{if(!jumping){velocityY=riding?0.22:.22;jumping=true}});
+$("magic").addEventListener("click",castSpell);
+$("ride").addEventListener("click",toggleRide);
+$("interact").addEventListener("click",interact);
+addEventListener("keydown",e=>{
+ if(e.key==="ArrowUp"||e.key==="w")keys.up=true;
+ if(e.key==="ArrowDown"||e.key==="s")keys.down=true;
+ if(e.key==="ArrowLeft"||e.key==="a")keys.left=true;
+ if(e.key==="ArrowRight"||e.key==="d")keys.right=true;
+ if(e.key===" ")velocityY=.22;
+ if(e.key==="e")interact();
+ if(e.key==="f")castSpell();
+});
+addEventListener("keyup",e=>{
+ if(["ArrowUp","w"].includes(e.key))keys.up=false;
+ if(["ArrowDown","s"].includes(e.key))keys.down=false;
+ if(["ArrowLeft","a"].includes(e.key))keys.left=false;
+ if(["ArrowRight","d"].includes(e.key))keys.right=false;
+});
 function animate(){
-
-requestAnimationFrame(animate);
-time+=.025;
-
-const p=hero.group;
-let moving=false;
-const speed=.13;
-
-if(keys.up){p.position.z-=speed;moving=true;p.rotation.y=0}
-if(keys.down){p.position.z+=speed;moving=true;p.rotation.y=Math.PI}
-if(keys.left){p.position.x-=speed;moving=true;p.rotation.y=-Math.PI/2}
-if(keys.right){p.position.x+=speed;moving=true;p.rotation.y=Math.PI/2}
-
-p.position.x=THREE.MathUtils.clamp(p.position.x,-18,18);
-p.position.z=THREE.MathUtils.clamp(p.position.z,-14,14);
-
-// Animasi kaki
-hero.legs.forEach((l,i)=>{
-l.rotation.x=moving?
-Math.sin(time*12+i*Math.PI)*.55:0;
+ requestAnimationFrame(animate);
+ const dt=Math.min(clock.getDelta(),.04);
+ const speed=riding?13:7;
+ let dx=0,dz=0;
+ if(keys.up)dz-=1;if(keys.down)dz+=1;
+ if(keys.left)dx-=1;if(keys.right)dx+=1;
+ const len=Math.hypot(dx,dz)||1;dx/=len;dz/=len;
+ if(dx||dz){
+  player.position.x+=dx*speed*dt;
+  player.position.z+=dz*speed*dt;
+  player.rotation.y=Math.atan2(dx,dz)+Math.PI;
+ }
+ player.position.x=THREE.MathUtils.clamp(player.position.x,-65,65);
+ player.position.z=THREE.MathUtils.clamp(player.position.z,-65,65);
+ if(jumping){
+  player.position.y+=velocityY;
+  velocityY-=.012;
+  if(player.position.y<=0){player.position.y=0;jumping=false;velocityY=0}
+ }
+ if(riding){
+  dragon.position.set(player.position.x,player.position.y+1,player.position.z);
+  dragon.rotation.y=player.rotation.y;
+  dragon.userData.wings.forEach((w,i)=>w.rotation.z=(i===0?-1:1)*(.5+Math.sin(clock.elapsedTime*12)*.35));
+  dragon.position.y+=Math.sin(clock.elapsedTime*4)*.12;
+ }
+ // Animasi dinosaur
+ player.rotation.z=dx*.08;
+ player.userData.robe.rotation.y=Math.sin(clock.elapsedTime*2)*.05;
+ // Kamera ikut pemain
+ const target=new THREE.Vector3(player.position.x+8,player.position.y+8,player.position.z+12);
+ camera.position.lerp(target,.08);
+ camera.lookAt(player.position.x,player.position.y+1,player.position.z-3);
+ // Kristal dikutip
+ for(let i=crystals.length-1;i>=0;i--){
+  const c=crystals[i];c.rotation.y+=dt*1.5;c.position.y= Math.sin(clock.elapsedTime*2+i)*.15;
+  if(c.position.distanceTo(player.position)<1.8){
+   scene.remove(c);crystals.splice(i,1);crystalCount++;
+   $("crystals").textContent=crystalCount;
+   say("Kristal ajaib diperoleh! 💎");
+   if(crystalCount===10)say("HEBAT! Semua 10 kristal telah dikumpulkan!");
+  }
+ }
+ for(let i=eggs.length-1;i>=0;i--){
+  const e=eggs[i];e.rotation.y+=dt;
+  if(e.position.distanceTo(player.position)<1.8){
+   scene.remove(e);eggs.splice(i,1);eggCount++;
+   $("eggs").textContent=eggCount;say("Telur dinosaur dijumpai! 🥚");
+  }
+ }
+ // Sihir dan serangan bos
+ for(let i=spells.length-1;i>=0;i--){
+  const s=spells[i];s.position.addScaledVector(s.userData.dir,dt*22);
+  if(s.position.distanceTo(boss.position)<2.5){
+   scene.remove(s);spells.splice(i,1);
+   bossHealth=Math.max(0,bossHealth-10);
+   $("bossHP").textContent=bossHealth;
+   boss.scale.multiplyScalar(.98);
+   if(bossHealth===0){say("TAHNIAH! Naga Gelap telah dikalahkan! 🏆");boss.visible=false}
+  }else if(s.position.distanceTo(player.position)>45){
+   scene.remove(s);spells.splice(i,1);
+  }
+ }
+ boss.rotation.y=Math.sin(clock.elapsedTime)*.4;
+ if(boss.visible&&boss.position.distanceTo(player.position)<4){
+  // Bos mengaum, tetapi tidak menolak pemain
+ }
+ renderer.render(scene,camera);
+}
+addEventListener("resize",()=>{
+ camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
 });
-
-// Ekor bergerak
-hero.tail.rotation.z=Math.sin(time*3)*.15;
-
-// Melompat
-if(keys.jump&&ground){
-vy=.23;
-ground=false;
-}
-p.position.y+=vy;
-vy-=.012;
-
-if(p.position.y<=0){
-p.position.y=0;
-vy=0;
-ground=true;
-}
-
-// Naga terbang mengelilingi pemain
-dragon.position.x=p.position.x+Math.sin(time*.8)*4;
-dragon.position.z=p.position.z-4+Math.cos(time*.8)*3;
-dragon.position.y=6+Math.sin(time*3)*.7;
-dragon.rotation.y=Math.sin(time)*.5;
-
-wings.forEach(w=>{
-w.mesh.rotation.z=
-w.side*Math.sin(time*12)*.7;
-});
-
-// Kristal
-gems.forEach(g=>{
-if(!g.visible)return;
-g.rotation.y+=.05;
-g.position.y=1+Math.sin(time*3)*.15;
-
-if(g.position.distanceTo(p.position)<1.3){
-g.visible=false;
-score++;
-document.getElementById('score').textContent=score;
-document.getElementById('message').textContent=
-'✨ Kristal sakti berjaya dikutip!';
-
-if(score>=10){
-document.getElementById('win').style.display='flex';
-}
-}
-});
-
-// Telur
-eggs.forEach(e=>{
-if(!e.visible)return;
-e.rotation.y+=.015;
-if(e.position.distanceTo(p.position)<1.2){
-e.visible=false;
-eggCount++;
-document.getElementById('message').textContent=
-'🥚 Telur dinosaur ditemui! '+eggCount+'/5';
-}
-});
-
-// Bola sihir bergerak
-for(let i=spells.length-1;i>=0;i--){
-const s=spells[i];
-s.mesh.position.addScaledVector(s.direction,.35);
-if(s.mesh.position.length()>70){
-scene.remove(s.mesh);
-spells.splice(i,1);
-}
-}
-
-// Bintang terapung
-sparkles.forEach((s,i)=>{
-s.position.y+=Math.sin(time+i)*.006;
-s.rotation.y+=.02;
-});
-
-// Kesatria mengangguk
-knight.group.rotation.y=Math.sin(time)*.15;
-
-// Kamera
-const target=new THREE.Vector3(
-p.position.x+8,p.position.y+9,p.position.z+12);
-
-camera.position.lerp(target,.075);
-camera.lookAt(p.position.x,p.position.y+1,p.position.z);
-
-renderer.render(scene,camera);
-}
-
-animate();
-
-// =============================
-// 13. SAIZ SKRIN
-// =============================
-
-addEventListener('resize',()=>{
-camera.aspect=innerWidth/innerHeight;
-camera.updateProjectionMatrix();
-renderer.setSize(innerWidth,innerHeight);
-});
-
+init();
 </script>
 </body>
 </html>
