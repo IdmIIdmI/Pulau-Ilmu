@@ -3,218 +3,212 @@
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Adventure Island 3D</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Adventure Island 3D V2</title>
 <style>
 body{margin:0;overflow:hidden;font-family:Arial}
 canvas{display:block}
-#hud{position:fixed;top:15px;left:15px;color:#fff;
-background:#174b38;padding:12px 18px;border-radius:15px;
-font-weight:bold;z-index:2}
-#controls{position:fixed;bottom:20px;width:100%;
-display:flex;justify-content:space-between;padding:0 20px;
-box-sizing:border-box;z-index:3}
-button{border:0;border-radius:15px;padding:18px;
-font-size:22px;background:#ffffffbb;color:#174b38;
-font-weight:bold;touch-action:none}
+#hud{position:fixed;top:12px;left:12px;background:#174b38;color:white;padding:12px;border-radius:14px;font-weight:bold;z-index:2}
+#controls{position:fixed;bottom:15px;left:15px;right:15px;display:flex;justify-content:space-between;z-index:3}
 .pad{display:grid;grid-template-columns:55px 55px 55px;gap:5px}
-#up{grid-column:2}#left{grid-column:1}
-#down{grid-column:2}#right{grid-column:3}
+button{border:2px solid white;border-radius:14px;background:#ffffffc9;color:#174b38;font-size:22px;font-weight:bold;padding:13px;touch-action:none}
+#up{grid-column:2}#left{grid-column:1}#down{grid-column:2}#right{grid-column:3}
+#jump{border-radius:50%;width:75px;height:75px;font-size:14px;background:#ffdc79}
 </style>
 </head>
 <body>
-
-<div id="hud">🏝️ ADVENTURE ISLAND<br>
-⭐ Kristal: <span id="score">0</span>/8</div>
-
+<div id="hud">🏝️ ADVENTURE ISLAND V2<br>💎 Kristal: <span id="score">0</span>/10</div>
 <div id="controls">
 <div class="pad">
-<button id="up">▲</button>
-<button id="left">◀</button>
-<button id="down">▼</button>
-<button id="right">▶</button>
+<button id="up">▲</button><button id="left">◀</button>
+<button id="down">▼</button><button id="right">▶</button>
 </div>
 <button id="jump">LOMPAT</button>
 </div>
-
 <script type="module">
-import * as THREE from
-'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x83d7ef);
-scene.fog=new THREE.Fog(0x83d7ef,25,65);
+scene.background=new THREE.Color(0x8bdaf0);
+scene.fog=new THREE.Fog(0x8bdaf0,35,75);
 
-const camera=new THREE.PerspectiveCamera(
-65,innerWidth/innerHeight,0.1,1000);
-
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,200);
 const renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.shadowMap.enabled=true;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xffffff,0x477b42,2));
-const sun=new THREE.DirectionalLight(0xffffff,2);
+scene.add(new THREE.HemisphereLight(0xffffff,0x567a40,2));
+const sun=new THREE.DirectionalLight(0xffffff,2.5);
 sun.position.set(10,20,10);
 sun.castShadow=true;
 scene.add(sun);
 
-function block(x,y,z,w,h,d,color){
-const o=new THREE.Mesh(
-new THREE.BoxGeometry(w,h,d),
-new THREE.MeshStandardMaterial({color}));
+const mat=(color)=>new THREE.MeshStandardMaterial({color});
+function box(x,y,z,w,h,d,color){
+const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(color));
 o.position.set(x,y,z);
-o.castShadow=true;
-o.receiveShadow=true;
-scene.add(o);
-return o;
+o.castShadow=true;o.receiveShadow=true;
+scene.add(o);return o;
+}
+function sphere(x,y,z,r,color){
+const o=new THREE.Mesh(new THREE.SphereGeometry(r,12,10),mat(color));
+o.position.set(x,y,z);o.castShadow=true;scene.add(o);return o;
 }
 
-// PULAU
-block(0,-0.6,0,35,1.2,28,0x9b7047);
-block(0,0,0,34.5,0.2,27.5,0x48a94c);
+// PULAU DAN LAUT
+box(0,-.65,0,36,1.3,30,0x946b43);
+box(0,.02,0,35.5,.15,29.5,0x4cae51);
+box(0,-1.35,0,100,.1,100,0x168fc5);
 
-// AIR LAUT
-const sea=block(0,-1.3,0,100,0.1,100,0x168dc4);
+// SUNGAI
+box(-5,.12,0,3,.04,26,0x31bde0);
 
-// POKOK
-function tree(x,z){
-block(x,0.9,z,0.4,1.8,0.4,0x81502c);
-for(let i=0;i<3;i++){
-const t=new THREE.Mesh(
-new THREE.ConeGeometry(1.2-i*.2,2,7),
-new THREE.MeshStandardMaterial({color:
-i%2?0x238b42:0x35a653}));
-t.position.set(x,2+i*.75,z);
-t.castShadow=true;
-scene.add(t);
-}
-}
-for(let i=0;i<24;i++){
-let x=Math.random()*28-14;
-let z=Math.random()*21-10;
-if(Math.abs(x)>4||Math.abs(z)>4)tree(x,z);
+// BATU TEPI SUNGAI
+for(let z=-11;z<=11;z+=2){
+sphere(-6,.25,z,.45,0x858b87);
+sphere(-4,.25,z,.45,0x858b87);
 }
 
-// BATU
-for(let i=0;i<12;i++){
-const rock=new THREE.Mesh(
-new THREE.DodecahedronGeometry(.5),
-new THREE.MeshStandardMaterial({color:0x999b91}));
-rock.position.set(Math.random()*25-12,.3,
-Math.random()*19-9);
-rock.scale.y=.6;
-scene.add(rock);
+// POKOK KELAPA
+function palm(x,z){
+box(x,.9,z,.35,1.8,.35,0x80502c);
+for(let i=0;i<6;i++){
+let a=i*Math.PI/3;
+const leaf=new THREE.Mesh(
+new THREE.ConeGeometry(.35,3,5),
+mat(0x23994b));
+leaf.position.set(x+Math.cos(a)*1.1,2,z+Math.sin(a)*1.1);
+leaf.rotation.z=Math.PI/2;
+leaf.rotation.y=-a;
+scene.add(leaf);
 }
+sphere(x,1.9,z,.3,0x278a42);
+}
+for(let i=0;i<20;i++){
+let x=Math.random()*26-13;
+let z=Math.random()*22-11;
+if(Math.abs(x)>7)palm(x,z);
+}
+
+// RUMAH KAYU
+box(7,1, -4,5,2.5,4,0xb8793c);
+box(7,2.5,-4,5.5,.25,4.5,0x63391e);
+const roof=new THREE.Mesh(
+new THREE.ConeGeometry(3.8,2,4),
+mat(0x9d3c2c));
+roof.position.set(7,3.5,-4);
+roof.rotation.y=Math.PI/4;
+scene.add(roof);
+box(7,1,-1.96,1,1.7,.1,0x4b3022);
+box(5.4,1.5,-1.92,.8,.7,.1,0x9ee2f2);
+box(8.6,1.5,-1.92,.8,.7,.1,0x9ee2f2);
+
+// JAMBATAN KAYU
+for(let i=0;i<8;i++){
+box(-5,.45,-7+i*1.8,2,.2,1.5,0x9a6034);
+}
+for(let x of [-6,-4]){
+box(x,1,-.7,.16,1.2,.16,0x754326);
+box(x,1,12,.16,1.2,.16,0x754326);
+}
+
+// AIR TERJUN DI HUJUNG SUNGAI
+box(-5,2,12,3,4,.4,0x42c9ef);
+for(let i=0;i<7;i++){
+sphere(-6+Math.random()*2,.5,12+Math.random(),.2,0xa9f1ff);
+}
+
+// HAIWAN KECIL
+function animal(x,z,color){
+let a=new THREE.Group();
+const b=new THREE.Mesh(new THREE.BoxGeometry(.8,.55,.5),mat(color));
+a.add(b);b.position.y=.45;
+const h=new THREE.Mesh(new THREE.SphereGeometry(.28,12,10),mat(color));
+h.position.set(.45,.7,0);a.add(h);
+for(let xx of [-.25,.25])for(let zz of [-.15,.15]){
+let leg=new THREE.Mesh(new THREE.BoxGeometry(.12,.4,.12),mat(0x46342b));
+leg.position.set(xx,.12,zz);a.add(leg);
+}
+a.position.set(x,0,z);scene.add(a);
+return a;
+}
+const deer=animal(10,5,0xc58b51);
+const rabbit=animal(-10,-5,0xe5e0d5);
+const animals=[deer,rabbit];
 
 // WATAK
 const player=new THREE.Group();
 scene.add(player);
-
-const body=block(0,0,0,0.7,1,0.45,0x2368d5);
-const head=new THREE.Mesh(
-new THREE.SphereGeometry(.35,16,16),
-new THREE.MeshStandardMaterial({color:0xffc18d}));
-head.position.y=.72;
-player.add(head);
-
-// Badan dan kepala diletakkan dalam kumpulan
-scene.remove(body);
-player.add(body);
-body.position.y=.1;
-
-// KAKI
+const torso=new THREE.Mesh(new THREE.BoxGeometry(.7,1,.45),mat(0x2565d5));
+torso.position.y=.9;player.add(torso);
+const head=new THREE.Mesh(new THREE.SphereGeometry(.32,16,12),mat(0xffc18c));
+head.position.y=1.62;player.add(head);
+const hair=new THREE.Mesh(new THREE.SphereGeometry(.33,12,8),mat(0x39291e));
+hair.position.set(0,1.78,0);player.add(hair);
+const legs=[];
 for(let x of [-.2,.2]){
-const leg=block(x,-.5,0,.22,.5,.25,0x26334b);
-player.add(leg);
+const l=new THREE.Mesh(new THREE.BoxGeometry(.22,.55,.25),mat(0x26334b));
+l.position.set(x,.25,0);player.add(l);legs.push(l);
 }
+player.position.set(0,0,7);
 
 // KRISTAL
 const gems=[];
-for(let i=0;i<8;i++){
-const gem=new THREE.Mesh(
-new THREE.OctahedronGeometry(.45),
-new THREE.MeshStandardMaterial({
-color:0x28eaff,emissive:0x087b9a,
-metalness:.5,roughness:.2}));
-gem.position.set(
-Math.random()*22-11,.8,Math.random()*17-8);
-scene.add(gem);
-gems.push(gem);
+for(let i=0;i<10;i++){
+const g=new THREE.Mesh(new THREE.OctahedronGeometry(.45),new THREE.MeshStandardMaterial({color:0x28edff,emissive:0x087b9a,metalness:.4,roughness:.2}));
+g.position.set(Math.random()*22-11,.8,Math.random()*20-10);
+scene.add(g);gems.push(g);
 }
-
-player.position.set(0,1,5);
 
 // KAWALAN
 const keys={};
-function bind(id,key){
+function bind(id,k){
 const b=document.getElementById(id);
-b.addEventListener('pointerdown',e=>{
-e.preventDefault();keys[key]=true;
-b.setPointerCapture(e.pointerId);
-});
-['pointerup','pointercancel','lostpointercapture']
-.forEach(ev=>b.addEventListener(ev,()=>keys[key]=false));
+b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true;b.setPointerCapture(e.pointerId)});
+['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false));
 }
-bind('up','up');
-bind('down','down');
-bind('left','left');
-bind('right','right');
+bind('up','up');bind('down','down');bind('left','left');bind('right','right');
 bind('jump','jump');
-
-let velocityY=0;
-let grounded=true;
-let score=0;
-
 addEventListener('keydown',e=>keys[e.key]=true);
 addEventListener('keyup',e=>keys[e.key]=false);
 
-// ANIMASI
+let vy=0,ground=true,score=0,time=0;
 function animate(){
-requestAnimationFrame(animate);
+requestAnimationFrame(animate);time+=.02;
+let moving=false,speed=.12;
+if(keys.up){player.position.z-=speed;moving=true}
+if(keys.down){player.position.z+=speed;moving=true}
+if(keys.left){player.position.x-=speed;moving=true;player.rotation.y=Math.PI/2}
+if(keys.right){player.position.x+=speed;moving=true;player.rotation.y=-Math.PI/2}
+player.position.x=THREE.MathUtils.clamp(player.position.x,-16,16);
+player.position.z=THREE.MathUtils.clamp(player.position.z,-13,13);
 
-let speed=.12;
-if(keys.up)player.position.z-=speed;
-if(keys.down)player.position.z+=speed;
-if(keys.left)player.position.x-=speed;
-if(keys.right)player.position.x+=speed;
+if(keys.jump&&ground){vy=.23;ground=false}
+player.position.y+=vy;vy-=.012;
+if(player.position.y<=0){player.position.y=0;vy=0;ground=true}
 
-player.position.x=Math.max(-15,Math.min(15,player.position.x));
-player.position.z=Math.max(-11,Math.min(11,player.position.z));
+legs.forEach((l,i)=>{l.rotation.x=moving?Math.sin(time*12+i*Math.PI)*.5:0});
 
-if(keys.jump&&grounded){
-velocityY=.22;
-grounded=false;
-}
-player.position.y+=velocityY;
-velocityY-=.012;
-if(player.position.y<=1){
-player.position.y=1;
-velocityY=0;
-grounded=true;
-}
-
-// KUTIP KRISTAL
 gems.forEach(g=>{
 if(g.visible){
 g.rotation.y+=.04;
-g.rotation.x+=.02;
+g.position.y=.8+Math.sin(time*3+g.position.x)*.1;
 if(g.position.distanceTo(player.position)<1.2){
-g.visible=false;
-score++;
+g.visible=false;score++;
 document.getElementById('score').textContent=score;
 }
 }
 });
 
+// HAIWAN BERGERAK
+deer.position.x=10+Math.sin(time)*2;
+rabbit.position.z=-5+Math.cos(time)*2;
+
 // KAMERA IKUT WATAK
-const target=new THREE.Vector3(
-player.position.x+8,
-player.position.y+9,
-player.position.z+12);
-camera.position.lerp(target,.08);
-camera.lookAt(player.position.x,player.position.y,player.position.z);
+camera.position.lerp(new THREE.Vector3(player.position.x+8,player.position.y+9,player.position.z+12),.08);
+camera.lookAt(player.position.x,player.position.y+0.7,player.position.z);
 
 renderer.render(scene,camera);
 }
